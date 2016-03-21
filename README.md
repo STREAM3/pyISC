@@ -1,6 +1,7 @@
-# pyisc
+# pyISC 
 
 The Python API to the ISC anomaly detection and classification framework.
+
 
 ##Prerequisite:
 
@@ -10,7 +11,7 @@ Recommended Python installation
 
 https://www.continuum.io/downloads
 
-libraries: numpy, (required for runing pyisc)
+Libraries: numpy, (required for runing pyisc)
            ipython, jupyter, pandas, sklearn (only required for runnung examples)
 Install on anacond: 
 
@@ -43,4 +44,8 @@ OS X:
 
 `>> python setup.py install`
 
+## Start tutorial
 
+`>> cd docs`
+
+`>> jupyter notebook`
