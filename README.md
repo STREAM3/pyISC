@@ -50,4 +50,4 @@ OS X:
 
 `>> jupyter notebook`
 
-Click on `pyISC_tutorial.ipynb` in the web page opened in a web browser
+Click on `pyISC_tutorial.ipynb` in the web page that was opened in a web browser.
