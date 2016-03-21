@@ -2,9 +2,11 @@
 
 The Python API to the ISC anomaly detection and classification framework.
 
-##Prerequiste:
+##Prerequisite:
 
-- [Recommended] Install Anaconda Python distribution 
+-  Install Python distribution 
+
+Recommended Python installation
 
 https://www.continuum.io/downloads
 
@@ -22,7 +24,7 @@ Windows:
 
 - Install Swig
 
-(search for suitable version with >> anaconda search -t conda swig)
+(search for suitable version with `>> anaconda search -t conda swig`)
 
 Windows:
 
