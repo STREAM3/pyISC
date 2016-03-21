@@ -11,8 +11,10 @@ Recommended Python installation
 
 https://www.continuum.io/downloads
 
-Libraries: numpy, (required for runing pyisc)
-           ipython, jupyter, pandas, sklearn (only required for runnung examples)
+Libraries: numpy, (required for running pyisc)
+           
+           ipython, jupyter, pandas, sklearn (only required for running tutorial examples)
+           
 Install on anacond: 
 
 `>> conda install numpy pandas scikit-learn  ipython jupyter`
