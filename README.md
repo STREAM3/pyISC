@@ -44,7 +44,7 @@ OS X:
 
 `>> python setup.py install`
 
-## Start tutorial
+## Run tutorial
 
 `>> cd docs`
 
