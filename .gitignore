@@ -1,0 +1,7 @@
+*.cpp
+numpy.i
+build
+pyisc.py
+visisc.py
+.ipynb_checkpoints
+*~
