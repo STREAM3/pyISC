@@ -1,0 +1,6 @@
+[submodule "isc2"]
+	path = isc2
+	url = https://github.com/sics-dna/isc2
+[submodule "dataformat"]
+	path = dataformat
+	url = https://github.com/sics-dna/dataformat

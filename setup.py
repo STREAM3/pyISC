@@ -42,7 +42,7 @@ with open(np_file_name, 'wb') as file:
 
 extra_flags = []
 
-disc_dir = os.path.join('..', '..')
+disc_dir = "."
 
 dataframe_src_dir = os.path.join(disc_dir,'dataformat')
 isc_src_dir = os.path.join(disc_dir, 'isc2')
