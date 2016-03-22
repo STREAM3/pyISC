@@ -38,7 +38,7 @@ OS X:
 
 ## Installation:
 
-`>> git clone https://github.com/STREAM3/pyisc -recursive`
+`>> git clone https://github.com/STREAM3/pyisc --recursive`
 
 `>> cd pyisc`
 
