@@ -13,7 +13,7 @@ Libraries:
 - numpy (required for running pyisc)
 - ipython, jupyter, pandas, scikit-learn (only required for running tutorial examples)
            
-Install on anacond:  
+Install with anacond:  
 
 `>> conda install numpy pandas scikit-learn  ipython jupyter`
 
