@@ -48,6 +48,6 @@ OS X:
 
 `>> cd docs`
 
-`>> jupyter notebook`
+`>> jupyter notebook pyISC_tutorial.ipynb`
 
-Click on `pyISC_tutorial.ipynb` in the web page that was opened in a web browser.
+If not opened automatically, click on `pyISC_tutorial.ipynb` in the web page that was opened in a web browser.
