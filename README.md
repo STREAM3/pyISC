@@ -7,7 +7,9 @@ The Python API to the ISC anomaly detection and classification framework.
 
 ###Install Python distribution 
 
-Anaconda is the recommended Python distribution: https://www.continuum.io/downloads
+Install Python 2.7
+
+Anaconda is the recommended Python distribution : https://www.continuum.io/downloads
 
 Libraries: 
 - numpy (required for running pyisc)
