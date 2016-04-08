@@ -20,9 +20,6 @@
  */
 
 #include "_AnomalyDetector.hh"
-#include <isc_micromodel_multigaussian.hh>
-#include <isc_micromodel_poissongamma.hh>
-#include "IscPoissonMicroModelOneside.hh"
 #include <math.h>
 #ifdef WIN32
 #define _USE_MATH_DEFINES
@@ -30,31 +27,27 @@
 #endif
 
 /**
+ * This is a function used to create a micro model for a given mixture component
+ *
  * co is the creating object, that is, the inner anomaly detector.
  */
 ::IscMicroModel *inner_create_micro_model(const void* co, int mixtureCompIndex)
 {
-	return ((pyisc::_AnomalyDetector*)co)->GetMixtureComponet(co, mixtureCompIndex);
+	return ((pyisc::_AnomalyDetector*)co)->_CreateMixtureComponet[mixtureCompIndex];
 }
-
-
 
 namespace pyisc {
 
+::IscMicroModel *_AnomalyDetector::_CreateMixtureComponet(int mixtureComponentIndex) {
+	return this->component_distribution_creators->create_component(mixtureComponentIndex);
+}
 
 
-//AnomalyDetector::AnomalyDetector(int n, int off, int splt, double th,
-//		int cl) {
-//	isc_anomaly_detector = new ::AnomalyDetector(n,off,splt,th,cl);
-//}
-/**
- * component_distributions and num_of_features_per_component are freed in this class deconstructor
- */
-_AnomalyDetector::_AnomalyDetector(int n, int off, int splt, double th,
-		int cl, ::IscCombinationRule cr,  int *component_distributions, int **component_feature_index, int* component_feature_length) : ::AnomalyDetector(n,off,splt,th,cl,cr, ::inner_create_micro_model) {
-	this->component_distributions = component_distributions;
-	this->component_feature_index = component_feature_index;
-	this->component_feature_length = component_feature_length;
+_AnomalyDetector::_AnomalyDetector(int off, int splt, double th,
+		int cl, ::IscCombinationRule cr,
+		pyisc::IscMicroModelCreator *component_distribution_creators) : ::AnomalyDetector(component_distribution_creators->length,off,splt,th,cl,cr, ::inner_create_micro_model) {
+
+	this->component_distribution_creators = component_distribution_creators->create(); // Creates a copy of the micro model creators
 }
 
 void _AnomalyDetector::_SetParams(int off, int splt, double th, int cl) {
@@ -137,28 +130,9 @@ int AnomalyDetector::CalcAnomalyDetailsSingle(union intfloat* vec,
 }*/
 
 
-::IscMicroModel *_AnomalyDetector::GetMixtureComponet(const void* co, int mixtureComponentIndex) {
-	switch(this->component_distributions[mixtureComponentIndex]) {
-	case Gaussian:
-		return new IscMultiGaussianMicroModel(this->component_feature_length[mixtureComponentIndex], this->component_feature_index[mixtureComponentIndex]);
-	case Poisson:
-		return new IscPoissonMicroModel(this->component_feature_index[mixtureComponentIndex][0],this->component_feature_index[mixtureComponentIndex][1]);
-	case PoissonOneside:
-		return new IscPoissonMicroModelOneside(this->component_feature_index[mixtureComponentIndex][0],this->component_feature_index[mixtureComponentIndex][1]);
-	default:
-		printf("Unknown component distribution %d", this->component_distributions[mixtureComponentIndex]);
-		return NULL;
-	}
-}
+
 _AnomalyDetector::~_AnomalyDetector(){
-	if(component_feature_index) {
-		for(int i=0; i < len; i++) {
-			if(component_feature_index[i]) {
-				delete [] component_feature_index[i];
-			}
-		}
-		delete [] component_feature_index;
-	}
+	delete component_distribution_creators;
 }
 
 
@@ -176,6 +150,8 @@ void _AnomalyDetector::_CalcAnomalyDetailPerformanceTest(pyisc::_DataObject* d) 
 	}
 
 }
+
+
 
 } /* namespace pyisc */
 

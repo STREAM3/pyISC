@@ -50,7 +50,9 @@ _DataObject::_DataObject(::DataObject* data_object) {
 }
 
 _DataObject::~_DataObject() {
-	printf("Delete object");
+	if(DEBUG) {
+		printf("Delete object");
+	}
 	if (is_data_obj_created && isc_data_obj) {
 		delete isc_data_obj;
 	}

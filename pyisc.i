@@ -131,7 +131,7 @@
 
   /* Parse the header file to generate wrappers */
 
- enum IscCombinationRule {IscMax, IscPlus, IscBoth};
+ enum IscCombinationRule {IscMax, IscPlus};
 
 
  %ignore IscCombinationRule;
@@ -144,7 +144,10 @@
  %include "src/_DataObject.hh"
  %include "src/_AnomalyDetector.hh"
  %include "isc2/isc_component.hh"
-
+ %include "isc2/isc_micromodel_multigaussian.hh"
+ %include "isc2/isc_micromodel_poissongamma.hh"
+ %include "src/IscPoissonMicroModelOneside.hh"
+ %include "isc2/isc_micromodel_markovgaussian.hh"
 
 
  %pythoncode %{

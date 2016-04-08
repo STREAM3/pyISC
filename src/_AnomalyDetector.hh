@@ -28,15 +28,69 @@
 #include <isc_micromodel.hh>
 #include <anomalydetector.hh>
 #include "_DataObject.hh"
+#include <isc_micromodel_multigaussian.hh>
+#include <isc_micromodel_poissongamma.hh>
+#include "IscPoissonMicroModelOneside.hh"
+#include <isc_micromodel_markovgaussian.hh>
+
 
 namespace pyisc {
 
-enum IscDistribution {Gaussian, Poisson, PoissonOneside};
+enum IscDistribution {Gaussian, Poisson, PoissonOneside, Exponential, Gamma, CondionalGaussian, CondionalGaussianCombiner};
 
+class IscMicroModelCreator {
+	IscMicroModel** components;
+	int length;
+public:
+	IscMicroModelCreator(int length) {
+		components = new IscMicroModel*[length];
+		this->length = length;
+	}
+
+	// Add a component by creating a copy with same constructor arguments
+	void add(int index, IscMicroModel* component) {
+		components[index] = component->create();
+	}
+
+	~IscMicroModelCreator(){
+		for(int i=0; i < length; i++) {
+			if(components[i]) {
+				delete components[i];
+			}
+		}
+		if(components) {
+			delete [] components;
+		}
+	}
+
+	// Create a copy with created components
+	IscMicroModelCreator* create() {
+		IscMicroModelCreator* array = new IscMicroModelCreator(length);
+		for(int i=0; i < length; i++) {
+			if(components[i]) {
+				array->add(i,components[i]);
+			}
+		}
+		return array;
+	}
+
+	// Create a component for given index
+	virtual IscMicroModel* create_component(int index) {
+		return components[index]->create();
+
+	}
+
+};
 
 class _AnomalyDetector : ::AnomalyDetector {
 public:
-	_AnomalyDetector(int n, int off, int splt, double th, int cl, ::IscCombinationRule cr, int *component_distributions, int **component_feature_index, int* component_feature_length);
+	_AnomalyDetector(
+			int off,
+			int splt,
+			double th,
+			int cl,
+			::IscCombinationRule cr,
+			 IscMicroModelCreator*);
 	/**
 	 * n is number of isc mixture components
 	 * off is the first column containing features used by the detector
@@ -52,8 +106,8 @@ public:
 	 * Pattern of input data vector: (ignored columns(header), distribution components, #distribution input values per component)
 	 *
 	 */
-//	_AnomalyDetector(int n, int off, int splt, double th, int cl,
-//			::IscCombinationRule cr, ::IscCreateFunc cf); // Or a creation function for the appropriate micromodels can be used
+	//	_AnomalyDetector(int n, int off, int splt, double th, int cl,
+	//			::IscCombinationRule cr, ::IscCreateFunc cf); // Or a creation function for the appropriate micromodels can be used
 	virtual ~_AnomalyDetector();
 	virtual void _SetParams(int off, int splt, double th, int cl);
 	virtual void _Reset();
@@ -72,7 +126,7 @@ public:
 			union intfloat* min = 0, union intfloat* max = 0,
 			double* expect = 0, double* var = 0);*/
 
-	virtual ::IscMicroModel *GetMixtureComponet(const void* co, int mixtureComponentIndex);
+	virtual ::IscMicroModel *_CreateMixtureComponet(const void* co, int mixtureComponentIndex);
 
 	virtual ::AnomalyDetector* get_isc_anomaly_detector() {return this;};
 
@@ -81,10 +135,7 @@ public:
 	virtual void _LogProbabilityOfData(class _DataObject* d, double* logp, int size);
 
 private:
-	int* component_distributions;
-	int** component_feature_index;
-	int* component_feature_length;
-
+	IscMicroModelCreator* component_distribution_creators;
 };
 
 

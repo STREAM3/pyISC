@@ -5,6 +5,8 @@ The Python API to the ISC anomaly detection and classification framework.
 
 ##Prerequisite:
 
+Notice, pyISC/visISC is only been tested on 64 bits machines.
+
 ###Install Python distribution 
 
 Install Python 2.7
