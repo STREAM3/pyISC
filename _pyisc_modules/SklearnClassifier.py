@@ -123,7 +123,7 @@ class SklearnClassifier(BaseISC, BaseEstimator, ClassifierMixin):
                     y=array([clazz]*len(X))
                 )
 
-                logps += [self._anomaly_detector._LogProbabilityOfData(data_object._as_super_class(), len(X))]
+                logps += [self._anomaly_detector._LogProbabilityOfData(data_object, len(X))]
 
             LogPs = [x-logsumexp(x) for x in array(logps).T]
 

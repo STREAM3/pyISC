@@ -1,5 +1,5 @@
-﻿ %module pyisc
-
+﻿
+ %module pyisc
 
  %{
  #define SWIG_FILE_WITH_INIT
@@ -19,9 +19,10 @@
  #include "isc2/isc_mixture.hh"
  #include "isc2/gamma.hh"
  #include "isc2/isc_micromodel_multigaussian.hh"
- //#include "isc2/sorteddynindvector.hh"
  #include "isc2/hgf.hh"
  #include "isc2/isc_micromodel_poissongamma.hh"
+ #include "isc2/isc_micromodel_markovgaussian.hh"
+ //#include "isc2/isc_micromodel_multidirichlet.hh"
  #include "isc2/anomalydetector.hh"
  #include "src/_Format.hh"
  #include "src/_DataObject.hh"
@@ -137,17 +138,19 @@
  %ignore IscCombinationRule;
  %ignore IscMax;
  %ignore IscPlus;
- %ignore IscBoth;
 
+ %rename ("_%s", regexmatch$name="^Isc") "";
 
  %include "src/_Format.hh"
  %include "src/_DataObject.hh"
  %include "src/_AnomalyDetector.hh"
  %include "isc2/isc_component.hh"
+ %include "isc2/isc_micromodel.hh"
  %include "isc2/isc_micromodel_multigaussian.hh"
  %include "isc2/isc_micromodel_poissongamma.hh"
- %include "src/IscPoissonMicroModelOneside.hh"
  %include "isc2/isc_micromodel_markovgaussian.hh"
+ #%include "isc2/isc_micromodel_multidirichlet.hh"
+
 
 
  %pythoncode %{

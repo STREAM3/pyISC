@@ -19,25 +19,30 @@ The Python Wrapper of all ISC anomaly detector training methods.
 # You should have received a copy of the GNU Lesser General Public License
 # along with this code.  If not, see <http://www.gnu.org/licenses/>.
 # --------------------------------------------------------------------------
-
-
+from _pyisc import _to_cpp_array
 from abc import abstractmethod
 import numpy
 from numpy import ndarray
-from pyisc import _AnomalyDetector, Gaussian, Poisson, PoissonOneside
+from pyisc import _to_cpp_array_int, _AnomalyDetector, \
+    _IscMultiGaussianMicroModel, \
+    _IscPoissonMicroModel, \
+    _IscPoissonMicroModelOneside, \
+    _IscMicroModelCreator
 import pyisc
 
 __author__ = 'tol'
 
 cr_max = pyisc.IscMax
 cr_plus= pyisc.IscPlus
-cr_both = pyisc.IscBoth
 
 class P_ProbabilityModel:
-    kind=None
     column_index=None
     @abstractmethod
     def __init__(self):
+        pass
+
+    @abstractmethod
+    def create_micromodel(self):
         pass
 
 class P_Gaussian(P_ProbabilityModel):
@@ -52,7 +57,9 @@ class P_Gaussian(P_ProbabilityModel):
             self.column_index = value_column
         else:
             self.column_index = [value_column]
-        self.kind=Gaussian
+
+    def create_micromodel(self):
+        return _IscMultiGaussianMicroModel(len(self.column_index), _to_cpp_array_int(self.column_index))
 
 class P_Poisson(P_ProbabilityModel):
 
@@ -64,7 +71,11 @@ class P_Poisson(P_ProbabilityModel):
         :param period_column:
         '''
         self.column_index = [frequency_column,period_column]
-        self.kind=Poisson
+
+
+    def create_micromodel(self):
+        return _IscPoissonMicroModel(self.column_index[0], self.column_index[1])
+
 
 class P_PoissonOnesided(P_ProbabilityModel):
 
@@ -77,7 +88,10 @@ class P_PoissonOnesided(P_ProbabilityModel):
         :return:
         '''
         self.column_index = [frequency_column,period_column]
-        self.kind = PoissonOneside
+
+
+    def create_micromodel(self):
+        return _IscPoissonMicroModelOneside(self.column_index[0], self.column_index[1])
 
 
 class BaseISC:
@@ -87,7 +101,7 @@ class BaseISC:
         The base class for all pyISC classes for statistical inference
 
         :param component_models: a statistical model reused for all mixture components, or an list of statistical models. Available statistical models are: PGaussian, PPoisson, PPoissonOneside.
-        :param output_combination_rule: an input defining which type of rule to use for combining the anomaly score output from each model in component_model. Available combination rules are: cr_max, cr_plus and cr_both.
+        :param output_combination_rule: an input defining which type of rule to use for combining the anomaly score output from each model in component_model. Available combination rules are: cr_max and cr_plus.
         :param anomaly_threshold: the threshold at which a row in the input is considered a anomaly during training, might differ from what is used for anomaly decision.
 
         :param clustering: boolean indicating whether to cluster the data.
@@ -102,7 +116,7 @@ class BaseISC:
         assert isinstance(component_models, P_ProbabilityModel) or \
                isinstance(component_models, list) and len(component_models) > 0 and \
                all([isinstance(m, P_ProbabilityModel) for m in component_models])
-        assert output_combination_rule in [cr_max, cr_plus, cr_both]
+        assert output_combination_rule in [cr_max, cr_plus]
 
 
 
@@ -137,23 +151,13 @@ class BaseISC:
 
 
         # Map argument to C++ argument
-        comp_distributions = pyisc._int_array(n)
-
-        model_features =  pyisc._int_pointer_array(n)
-
-        model_features_length = pyisc._int_array(n)
+        comp_distributions = _IscMicroModelCreator(n)
 
         for i in range(n):
-            pyisc._set_array_value(comp_distributions, i, component_models[i].kind)
-
-            number_of_features = len(component_models[i].column_index)
-            pyisc._set_array_value(model_features_length, i, number_of_features)
-            model_feature_index = pyisc._to_cpp_array_int(component_models[i].column_index)
-
-            pyisc._set_int_array(model_features, i, model_feature_index)
+            comp_distributions.add(i,component_models[i].create_micromodel())
 
         self.num_of_partitions = n
-        self._anomaly_detector = _AnomalyDetector(n, off, splt, th, cl, output_combination_rule, comp_distributions, model_features, model_features_length);
+        self._anomaly_detector = _AnomalyDetector(off, splt, th, cl, output_combination_rule, comp_distributions);
 
     def fit(self, X, y=None):
         '''

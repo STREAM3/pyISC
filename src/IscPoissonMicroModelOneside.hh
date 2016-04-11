@@ -31,7 +31,12 @@ class IscPoissonMicroModelOneside : public IscPoissonMicroModel {
 public:
   IscPoissonMicroModelOneside(int ir, int it) : IscPoissonMicroModel(ir, it) {};
   virtual ~IscPoissonMicroModelOneside() {};
-  virtual double anomaly(intfloat* vec) { if (vec[indr].f*sumt < sumr*vec[indt].f) return 0.0; else return IscPoissonMicroModel::anomaly(vec); };
+  virtual double anomaly(intfloat* vec) {
+	  if (vec[indr].f*sumt < sumr*vec[indt].f)
+		  return 0.0;
+	  else
+		  return IscPoissonMicroModel::anomaly(vec);
+  };
 };
 
 #endif //IscPoissonMicroModelOneside_HH_

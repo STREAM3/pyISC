@@ -98,12 +98,13 @@ dataframe_sources = [os.path.join(dataframe_src_dir, src)
                      for src in "readtokens.o table.o format.o formatdispatch.o formatbinary.o " \
                                 "formatdiscr.o formatcont.o formatsymbol.o formattime.o formatunknown.o " \
                                 "data.o datafile.o datadispatch.o".replace(".o", ".cc").split()]
-dataframe_headers = [s.replace(".cc", ".hh") for s in dataframe_sources]
+
 isc_sources = [os.path.join(isc_src_dir, src)
                for src in "anomalydetector.o isc_mixture.o isc_component.o isc_micromodel_poissongamma.o " \
-                          "isc_micromodel_gaussian.o isc_micromodel_multigaussian.o hmatrix.o gamma.o hgf.o"
+                          "isc_micromodel_gaussian.o isc_micromodel_multigaussian.o " \
+                          "isc_micromodel_markovgaussian.o " \
+                          "hmatrix.o gamma.o hgf.o"
                    .replace(".o", ".cc").split()]
-isc_headers = [s.replace(".cc", ".hh") for s in isc_sources]
 
 pyisc_sources = [os.path.join(pyisc_src_dir, src) for src in ["_Format.cc", "_DataObject.cc", "_AnomalyDetector.cc"]]
 pyisc_headers = [s.replace(".cc", ".hh") for s in pyisc_sources]
@@ -117,7 +118,6 @@ if os.path.exists('pyisc.i'):
           version="1.0",
           ext_modules=[
               Extension("_pyisc",
-                        headers=dataframe_headers+isc_headers+pyisc_headers,
                         sources=dataframe_sources+isc_sources+pyisc_sources+["pyisc.i"],
                         include_dirs=[disc_dir, isc_src_dir, dataframe_src_dir, pyisc_src_dir]+numpyincdir,
                         extra_compile_args=extra_flags,
@@ -138,7 +138,6 @@ setup(name="pyisc",
       version="1.0",
       ext_modules=[
           Extension("_pyisc",
-                    headers=dataframe_headers+isc_headers+pyisc_headers,
                     sources=dataframe_sources+isc_sources+pyisc_sources+["pyisc_wrap.cpp"],
                     include_dirs=[disc_dir, isc_src_dir,dataframe_src_dir,pyisc_src_dir]+numpyincdir,
                     extra_compile_args=extra_flags,

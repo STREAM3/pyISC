@@ -28,10 +28,6 @@
 #include <isc_micromodel.hh>
 #include <anomalydetector.hh>
 #include "_DataObject.hh"
-#include <isc_micromodel_multigaussian.hh>
-#include <isc_micromodel_poissongamma.hh>
-#include "IscPoissonMicroModelOneside.hh"
-#include <isc_micromodel_markovgaussian.hh>
 
 
 namespace pyisc {
@@ -39,12 +35,13 @@ namespace pyisc {
 enum IscDistribution {Gaussian, Poisson, PoissonOneside, Exponential, Gamma, CondionalGaussian, CondionalGaussianCombiner};
 
 class IscMicroModelCreator {
+protected:
 	IscMicroModel** components;
-	int length;
+	int size_;
 public:
-	IscMicroModelCreator(int length) {
-		components = new IscMicroModel*[length];
-		this->length = length;
+	IscMicroModelCreator(int size) {
+		components = new IscMicroModel*[size];
+		this->size_ = size;
 	}
 
 	// Add a component by creating a copy with same constructor arguments
@@ -53,7 +50,7 @@ public:
 	}
 
 	~IscMicroModelCreator(){
-		for(int i=0; i < length; i++) {
+		for(int i=0; i < size_; i++) {
 			if(components[i]) {
 				delete components[i];
 			}
@@ -65,8 +62,8 @@ public:
 
 	// Create a copy with created components
 	IscMicroModelCreator* create() {
-		IscMicroModelCreator* array = new IscMicroModelCreator(length);
-		for(int i=0; i < length; i++) {
+		IscMicroModelCreator* array = new IscMicroModelCreator(size_);
+		for(int i=0; i < size_; i++) {
 			if(components[i]) {
 				array->add(i,components[i]);
 			}
@@ -78,6 +75,10 @@ public:
 	virtual IscMicroModel* create_component(int index) {
 		return components[index]->create();
 
+	}
+
+	virtual int size() {
+		return this->size_;
 	}
 
 };
@@ -126,7 +127,7 @@ public:
 			union intfloat* min = 0, union intfloat* max = 0,
 			double* expect = 0, double* var = 0);*/
 
-	virtual ::IscMicroModel *_CreateMixtureComponet(const void* co, int mixtureComponentIndex);
+	virtual ::IscMicroModel *_CreateMixtureComponet(int mixtureComponentIndex);
 
 	virtual ::AnomalyDetector* get_isc_anomaly_detector() {return this;};
 

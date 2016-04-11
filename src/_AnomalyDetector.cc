@@ -33,7 +33,7 @@
  */
 ::IscMicroModel *inner_create_micro_model(const void* co, int mixtureCompIndex)
 {
-	return ((pyisc::_AnomalyDetector*)co)->_CreateMixtureComponet[mixtureCompIndex];
+	return ((pyisc::_AnomalyDetector*)co)->_CreateMixtureComponet(mixtureCompIndex);
 }
 
 namespace pyisc {
@@ -45,7 +45,7 @@ namespace pyisc {
 
 _AnomalyDetector::_AnomalyDetector(int off, int splt, double th,
 		int cl, ::IscCombinationRule cr,
-		pyisc::IscMicroModelCreator *component_distribution_creators) : ::AnomalyDetector(component_distribution_creators->length,off,splt,th,cl,cr, ::inner_create_micro_model) {
+		pyisc::IscMicroModelCreator *component_distribution_creators) : ::AnomalyDetector(component_distribution_creators->size(),off,splt,th,cl,cr, ::inner_create_micro_model) {
 
 	this->component_distribution_creators = component_distribution_creators->create(); // Creates a copy of the micro model creators
 }
