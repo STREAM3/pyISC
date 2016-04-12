@@ -21,6 +21,10 @@ Install with anacond:
 
 `>> conda install numpy pandas scikit-learn  ipython jupyter`
 
+If you intend to also install visISC, you have to downgrade the numpy installation to version 1.9
+
+`>> conda install numpy==1.9.3`
+
 ### Install a c++ compiler if not installed
 
 Windows:
