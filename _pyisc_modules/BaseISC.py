@@ -27,7 +27,7 @@ from pyisc import _to_cpp_array_int, _AnomalyDetector, \
     _IscMultiGaussianMicroModel, \
     _IscPoissonMicroModel, \
     _IscPoissonMicroModelOneside, \
-    _IscMicroModelCreator
+    _IscMicroModelCreator, _IscGammaMicroModel, _IscExponentialMicroModel
 import pyisc
 
 __author__ = 'tol'
@@ -65,7 +65,8 @@ class P_Poisson(P_ProbabilityModel):
 
     def __init__(self, frequency_column, period_column):
         '''
-        A Poisson distribution using frequency_column as column index into the data object for the frequency and period_column into the data object for the period where frequency was counted.
+        A Poisson distribution using frequency_column as column index into the data object for the frequency and
+        period_column into the data object for the period where frequency was counted.
         This probability model checks for both unusual high frequency values and unusual small values.
         :param frequency_column:
         :param period_column:
@@ -81,7 +82,8 @@ class P_PoissonOnesided(P_ProbabilityModel):
 
     def __init__(self, frequency_column, period_column):
         '''
-        A Poisson distribution using frequency_column as column index into the data object for the frequency and period_column into the data object for the period where frequency was counted.
+        A Poisson distribution using frequency_column as column index into the data object for the frequency and
+        period_column into the data object for the period where frequency was counted.
         This probability model only checks for unusual high frequency values, but not unusual small values.
         :param frequency_column:
         :param period_column:
@@ -94,13 +96,31 @@ class P_PoissonOnesided(P_ProbabilityModel):
         return _IscPoissonMicroModelOneside(self.column_index[0], self.column_index[1])
 
 
+class P_Gamma(P_ProbabilityModel):
+
+    def __init__(self, frequency_column, period_column):
+        '''
+        An approximation of the Gamma distribution by the use of Poisson distribution that uses the frequency_column as column index into the data object for the frequency and
+        period_column into the data object for the period where frequency was counted.
+        :param frequency_column:
+        :param period_column:
+        :return:
+        '''
+
+        self.frequency_column = frequency_column
+        self.period_column = period_column
+
+    def create_micromodel(self):
+        return _IscGammaMicroModel(self.frequency_column,self.period_column)
+
+
 class BaseISC:
 
     def __init__(self, component_models=P_Gaussian(0), output_combination_rule=cr_max, anomaly_threshold = 0.0, clustering = False):
         '''
         The base class for all pyISC classes for statistical inference
 
-        :param component_models: a statistical model reused for all mixture components, or an list of statistical models. Available statistical models are: PGaussian, PPoisson, PPoissonOneside.
+        :param component_models: a statistical model reused for all mixture components, or an list of statistical models. Available statistical models are: P_Gaussian, P_Poisson, P_PoissonOneside.
         :param output_combination_rule: an input defining which type of rule to use for combining the anomaly score output from each model in component_model. Available combination rules are: cr_max and cr_plus.
         :param anomaly_threshold: the threshold at which a row in the input is considered a anomaly during training, might differ from what is used for anomaly decision.
 
