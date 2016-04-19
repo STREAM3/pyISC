@@ -15,7 +15,7 @@ Anaconda is the recommended Python distribution : https://www.continuum.io/downl
 
 Libraries: 
 - numpy (required for running pyisc)
-- ipython, jupyter, pandas, scikit-learn (only required for running tutorial examples)
+- matplotlib, ipython, jupyter, pandas, scikit-learn (only required for running tutorial examples)
            
 Install with anacond:  
 
