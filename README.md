@@ -2,7 +2,7 @@
 
 The Python API to the ISC anomaly detection and classification framework. The framework implements Baysian statistical methods for anomnaly detetcion and classification. Currently supported statistical models are: Possion, Gamma and multivariate Gaussian distributions.
 
-## Email forum(s)
+### Email forum(s)
 
 Questions regarding the use of the framework: https://groups.google.com/forum/#!forum/pyisc-users
 
