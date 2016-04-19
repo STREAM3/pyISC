@@ -8,7 +8,7 @@ Questions regarding the use of the framework: https://groups.google.com/forum/#!
 
 ##Prerequisite:
 
-Notice, pyISC/visISC is only been tested on 64 bits machines.
+Notice, pyISC/visISC has only been tested on 64 bits machines.
 
 ###Install Python distribution 
 
