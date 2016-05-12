@@ -50,7 +50,11 @@ OS X:
 `>> conda install --channel https://conda.anaconda.org/minrk swig`
 
 
-## Installation:
+## Installation
+
+For installing from source code, you need <a href="https://git-scm.com/downloads">git client</a>
+
+Then:
 
 `>> git clone https://github.com/STREAM3/pyisc --recursive`
 
