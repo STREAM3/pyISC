@@ -8,7 +8,7 @@ Questions regarding the use of the framework: https://groups.google.com/forum/#!
 
 ##Prerequisite:
 
-Notice, pyISC/visISC has only been tested on 64 bits machines.
+Notice, pyISC/visISC has only been tested using 64 bit Python.
 
 ###Install Python distribution 
 
@@ -20,7 +20,7 @@ Libraries:
 - numpy (required for running pyisc)
 - matplotlib, ipython, jupyter, pandas, scikit-learn (only required for running tutorial examples)
            
-Install with anacond:  
+Install with anaconda:  
 
 `>> conda install numpy pandas scikit-learn  ipython jupyter`
 
