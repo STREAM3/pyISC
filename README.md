@@ -35,7 +35,8 @@ Windows:
 `>> conda install mingw libpython`
 
 OS X:
-Install the developer tools Xcode from AppStore.
+
+Install the Xcode developer tools from App Store.
 
 ###Install Swig
 
