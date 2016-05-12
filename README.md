@@ -22,7 +22,7 @@ Libraries:
 
 Install with anaconda:  
 
-(If you want to disable ssl verification when installing, you find the instructions <a href="https://docs.continuum.io/anaconda-repository/faq#how-do-i-disable-ssl-checking-on-package-installation">here</a>.)
+(If you want to disable ssl verification when installing, you will find the instructions <a href="https://docs.continuum.io/anaconda-repository/faq#how-do-i-disable-ssl-checking-on-package-installation">here</a>.)
 
 `>> conda install numpy pandas scikit-learn  ipython jupyter`
 
