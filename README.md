@@ -19,7 +19,7 @@ Anaconda is the recommended Python distribution : https://www.continuum.io/downl
 Libraries: 
 - numpy (required for running pyisc)
 - matplotlib, ipython, jupyter, pandas, scikit-learn (only required for running tutorial examples)
-           
+
 Install with anaconda:  
 
 `>> conda install numpy pandas scikit-learn  ipython jupyter`
@@ -52,7 +52,7 @@ OS X:
 
 ## Installation
 
-For installing from source code, you need <a href="https://git-scm.com/downloads">git client</a>
+For installing from source code, you need a <a href="https://git-scm.com/downloads">git client</a>
 
 Then:
 
