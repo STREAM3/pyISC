@@ -27,13 +27,16 @@
  #include "src/_Format.hh"
  #include "src/_DataObject.hh"
  #include "src/_AnomalyDetector.hh"
-
  %}
  %include <typemaps.i>
  %include "numpy.i"
  %init %{
  import_array();
  %}
+
+
+
+
 
 %inline %{
   /* Create any sort of [size] array */
@@ -120,6 +123,20 @@
     return strings[i];
   }
 
+
+  IscMarkovGaussMicroModel** _to_pointer(std::vector<IscMarkovGaussMicroModel*> vec) {
+    IscMarkovGaussMicroModel** new_vec = new IscMarkovGaussMicroModel*[vec.size()];
+    for(int i=0; i < vec.size(); i++) {
+        new_vec[i] = vec[i];
+    }
+    return new_vec;
+  }
+
+  void _free_pointer(IscMarkovGaussMicroModel** new_vec) {
+    delete [] new_vec;
+  }
+
+
   %}
 
  %apply (double* IN_ARRAY1, int DIM1) {(double* in_array1D, int num_of_columns)}
@@ -141,6 +158,8 @@
 
  %rename ("_%s", regexmatch$name="^Isc") "";
 
+ %include "std_vector.i"
+
  %include "src/_Format.hh"
  %include "src/_DataObject.hh"
  %include "src/_AnomalyDetector.hh"
@@ -151,6 +170,11 @@
  %include "isc2/isc_micromodel_markovgaussian.hh"
  #%include "isc2/isc_micromodel_multidirichlet.hh"
 
+#%template(_IscMicroModelCreator) pyisc::_IscMicroModelCreatorTemplate<IscMicroModel>;
+#%template(_IscMarkovGaussMicroModelCreator) pyisc::_IscMicroModelCreatorTemplate<IscMarkovGaussMicroModel>;
+
+%template(_IscMicroModelVector) std::vector<IscMicroModel*>;
+%template(_IscMarkovGaussMicroModelVector) std::vector<IscMarkovGaussMicroModel*>;
 
 
  %pythoncode %{

@@ -45,6 +45,7 @@ Format::~Format() {
 		if(DEBUG)
 			printf("Delete isc format\n");
 		delete isc_format;
+		isc_format=0;
 	}
 }
 

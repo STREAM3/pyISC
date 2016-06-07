@@ -39,15 +39,20 @@
 namespace pyisc {
 
 ::IscMicroModel *_AnomalyDetector::_CreateMixtureComponet(int mixtureComponentIndex) {
-	return this->component_distribution_creators->create_component(mixtureComponentIndex);
+	return this->component_distribution_creators[mixtureComponentIndex]->create();
 }
 
 
-_AnomalyDetector::_AnomalyDetector(int off, int splt, double th,
+_AnomalyDetector::_AnomalyDetector(
+		int off, int splt, double th,
 		int cl, ::IscCombinationRule cr,
-		pyisc::IscMicroModelCreator *component_distribution_creators) : ::AnomalyDetector(component_distribution_creators->size(),off,splt,th,cl,cr, ::inner_create_micro_model) {
+		std::vector<IscMicroModel*> component_distribution_creators) : ::AnomalyDetector(component_distribution_creators.size(),off,splt,th,cl,cr, inner_create_micro_model) {
 
-	this->component_distribution_creators = component_distribution_creators->create(); // Creates a copy of the micro model creators
+	for(int i=0; i <  component_distribution_creators.size(); i++) {
+		this->component_distribution_creators.push_back(component_distribution_creators[i]->create());
+	}
+	if(DEBUG)
+		printf("_AnomalyDetector created\n");
 }
 
 void _AnomalyDetector::_SetParams(int off, int splt, double th, int cl) {
@@ -73,6 +78,21 @@ void _AnomalyDetector::_TrainOne(Format* format, double* in_array1D, int num_of_
 	delete [] vec;
 }
 
+void _AnomalyDetector::_UntrainOne(Format* format, double* in_array1D, int num_of_columns) {
+	intfloat* vec = new intfloat[num_of_columns];
+	for (int j = 0; j < num_of_columns; j++) {
+		if (format->get_isc_format()->nth(j)->type() == FORMATSPEC_DISCR) {
+			vec[j].i = (int) in_array1D[j];
+		} else if (format->get_isc_format()->nth(j)->type()
+				== FORMATSPEC_CONT) {
+			vec[j].f = (float) in_array1D[j];
+		}
+	}
+	::AnomalyDetector::UntrainOne(vec);
+
+	delete [] vec;
+}
+
 void _AnomalyDetector::_TrainDataIncrementally(pyisc::_DataObject* d) {
 	for(int i=0; i < d->size(); i++) {
 		::AnomalyDetector::TrainOne((*d->get_isc_data_object())[i]);
@@ -80,6 +100,12 @@ void _AnomalyDetector::_TrainDataIncrementally(pyisc::_DataObject* d) {
 
 }
 
+void _AnomalyDetector::_UntrainDataIncrementally(pyisc::_DataObject* d) {
+	for(int i=0; i < d->size(); i++) {
+		::AnomalyDetector::UntrainOne((*d->get_isc_data_object())[i]);
+	}
+
+}
 
 void _AnomalyDetector::_TrainData(_DataObject* d) {
 	::AnomalyDetector::TrainData(d->get_isc_data_object());
@@ -131,8 +157,16 @@ int AnomalyDetector::CalcAnomalyDetailsSingle(union intfloat* vec,
 
 
 
-_AnomalyDetector::~_AnomalyDetector(){
-	delete component_distribution_creators;
+_AnomalyDetector::~_AnomalyDetector() {
+	if(DEBUG)
+		printf("_AnomalyDetector deletion started\n");
+
+	for(int i=0; i <  this->component_distribution_creators.size(); i++) {
+		delete this->component_distribution_creators[i];
+	}
+
+	if(DEBUG)
+		printf("_AnomalyDetector deleted\n");
 }
 
 
@@ -148,6 +182,9 @@ void _AnomalyDetector::_CalcAnomalyDetailPerformanceTest(pyisc::_DataObject* d) 
 		::AnomalyDetector::CalcAnomalyDetails((*data)[i], dum3, dum1, dum2, devs,
 				0,0,0,expect2,0);
 	}
+
+	delete [] devs;
+	delete [] expect2;
 
 }
 

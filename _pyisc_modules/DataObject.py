@@ -67,36 +67,36 @@ class DataObject(pyisc._DataObject):
             pyisc._DataObject.__init__(self,X)
             return
         elif isinstance(X, ndarray):
-                if format is None:
-                    format = Format()
-                    num_cols = len(X.T)
-                    if class_column is not None:
-                        assert class_column >= 0 and class_column < num_cols
-                    for col in range(num_cols):
-                        if col != class_column:
-                            format.addColumn("Column %i"%col, Format.Continuous)
+            if format is None:
+                format = Format()
+                num_cols = len(X.T)
+                if class_column is not None:
+                    assert class_column >= 0 and class_column < num_cols
+                for col in range(num_cols):
+                    if col != class_column:
+                        format.addColumn("Column %i"%col, Format.Continuous)
+                    else:
+                        format.addColumn("Column %i"%col, Format.Symbol)
+                        A =  X.T.copy()
+                        if classes == 'auto':
+                            self.classes_ =  list(sorted(unique(A[class_column])))
                         else:
-                            format.addColumn("Column %i"%col, Format.Symbol)
-                            A =  X.T.copy()
-                            if classes == 'auto':
-                                self.classes_ =  list(sorted(unique(A[class_column])))
-                            else:
-                                self.classes_ = classes
-                            class_col = format.get_nth_column(class_column)
-                            for c in self.classes_:
-                                class_col.add("Class %i"%c if isinstance(c, int) else "Class %s"%c if isinstance(c, str) and len(c) == 1 else str(c))
-                            A[class_column] = [self.classes_.index(v) if v in self.classes_ else -1 for v in A[class_column]]
-                            X = A.T
-                    self._format = format
-                    if X.ndim == 1: # This fixes a problem of converting it to c++ data object
-                        X = array([X.copy()]).T
+                            self.classes_ = classes
+                        class_col = format.get_nth_column(class_column)
+                        for c in self.classes_:
+                            class_col.add("Class %i"%c if isinstance(c, int) else "Class %s"%c if isinstance(c, str) and len(c) == 1 else str(c))
+                        A[class_column] = [self.classes_.index(v) if v in self.classes_ else -1 for v in A[class_column]]
+                        X = A.T
+                self._format = format
+                if X.ndim == 1: # This fixes a problem of converting it to c++ data object
+                    X = array([X.copy()]).T
 
-                    pyisc._DataObject.__init__(self,format,X.astype(float))
-                    return
-                elif isinstance(format, pyisc.Format):
-                    self._format = format
-                    pyisc._DataObject.__init__(self,format,X)
-                    return
+                pyisc._DataObject.__init__(self,format,X.astype(float))
+                return
+            elif isinstance(format, pyisc.Format):
+                self._format = format
+                pyisc._DataObject.__init__(self,format,X)
+                return
         pyisc._DataObject.__init__(self,X)
 
     def as_1d_array(self):

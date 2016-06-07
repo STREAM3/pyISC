@@ -26,6 +26,7 @@ from pyisc import BaseISC
 
 import pyisc
 
+
 class AnomalyDetector(BaseISC):
 
     def anomaly_score(self,X, y=None):
@@ -37,8 +38,6 @@ class AnomalyDetector(BaseISC):
         '''
         if isinstance(X, pyisc._DataObject):
             return self._anomaly_detector._CalcAnomaly(X,X.size())
-        elif isinstance(X, pyisc.DataObject):
-            return self.anomaly_score(X._as_super_class())
         elif isinstance(X, ndarray):
             data_object = self._convert_to_data_object_in_scoring(X, y)
 

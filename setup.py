@@ -52,7 +52,7 @@ dataframe_src_dir = os.path.join(disc_dir,'dataformat')
 isc_src_dir = os.path.join(disc_dir, 'isc2')
 pyisc_src_dir = "src"
 pyisc_module_dir = "_pyisc_modules"
-isclibraries = []
+isclibraries = ["-Wall", "-O"]
 
 numpyincdir = get_numpy_include_dirs()
 

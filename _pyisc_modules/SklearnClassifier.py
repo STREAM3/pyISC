@@ -103,7 +103,7 @@ class SklearnClassifier(BaseISC, BaseEstimator, ClassifierMixin):
             data_object = self.\
                 _convert_to_data_object_in_scoring(
                 X,
-                y=(array([-1]*len(X)) if self.class_column == X.ndim else self.class_column) # An unknown class
+                y=(array([-1]*len(X)) if X.ndim == 2 and self.class_column == len(X[0]) or X.ndim == 1 and self.class_column == 1 else self.class_column) # An unknown class
             )
             if data_object is not None:
                 return self.predict(data_object)
