@@ -166,7 +166,6 @@ class P_ConditionalGaussianCombiner(P_ProbabilityModel):
         for i in range(num_of_components):
             creator.push_back(self.gaussian_components[i].create_micromodel())
         ptr_creator = pyisc._to_pointer(creator)
-        print "num_of_components", num_of_components
         self._saved_model = _IscMarkovGaussCombinerMicroModel(ptr_creator, num_of_components)
         pyisc._free_pointer(ptr_creator)
         return self._saved_model
@@ -199,9 +198,12 @@ class BaseISC:
         '''
         The base class for all pyISC classes for statistical inference
 
-        :param component_models: a statistical model reused for all mixture components, or an list of statistical models. Available statistical models are: P_Gaussian, P_Poisson, P_PoissonOneside.
-        :param output_combination_rule: an input defining which type of rule to use for combining the anomaly score output from each model in component_model. Available combination rules are: cr_max and cr_plus.
-        :param anomaly_threshold: the threshold at which a row in the input is considered a anomaly during training, might differ from what is used for anomaly decision.
+        :param component_models: a statistical model reused for all mixture components, or an list of statistical models.
+        Available statistical models are: P_Gaussian, P_Poisson, P_PoissonOneside.
+        :param output_combination_rule: an input defining which type of rule to use for combining the anomaly score
+        output from each model in component_model. Available combination rules are: cr_max and cr_plus.
+        :param anomaly_threshold: the threshold at which a row in the input is considered a anomaly during training,
+        might differ from what is used for anomaly decision.
 
         :param clustering: boolean indicating whether to cluster the data.
         :return:
@@ -221,6 +223,7 @@ class BaseISC:
 
         self.anomaly_threshold = anomaly_threshold
         self.is_clustering = clustering
+        self.output_combination_rule = output_combination_rule
 
         #//AnomalyDetector(int n, int off, int splt, double th, int cl); // Sublasses must know the numbers and types of micromodels
 
@@ -256,6 +259,7 @@ class BaseISC:
         for i in range(n):
             comp_distributions.push_back(self.component_models[i].create_micromodel())
 
+        self.classes_ = None
         self.num_of_partitions = n
         self._anomaly_detector = _AnomalyDetector(off, splt, th, cl, output_combination_rule, comp_distributions);
 
@@ -268,34 +272,38 @@ class BaseISC:
         :return:
         '''
 
-        if isinstance(X, pyisc._DataObject):
-            assert not isinstance(y, list) and not isinstance(y, ndarray)
-            self.class_column = y
-            self._anomaly_detector._SetParams(0,-1 if self.class_column is None else self.class_column ,self.anomaly_threshold,1 if self.is_clustering else 0)
+        if isinstance(X, pyisc.DataObject) and y is None:
+            assert y is None # Contained in the data object
+            self.class_column = X.class_column
+            self._anomaly_detector._SetParams(
+                0,
+                -1 if X.class_column is None else X.class_column,
+                self.anomaly_threshold,
+                1 if self.is_clustering else 0
+            )
             self._anomaly_detector._TrainData(X)
             return self
-
         if isinstance(X, ndarray):
             class_column = -1
             data_object = None
+            assert X.ndim <= 2
+            if X.ndim == 2:
+                max_class_column = X.shape[1]
+            else:
+                max_class_column = 1
             if isinstance(y, list) or isinstance(y, ndarray):
                 assert len(X) == len(y)
-                assert X.ndim <= 2
-                if X.ndim == 2:
-                    class_column=X.shape[1]
-                else:
-                    class_column = 1
-
+                class_column = max_class_column
                 data_object = pyisc.DataObject(numpy.c_[X, y], class_column=class_column)
-            elif y is None or int(y) == y and y > -1:
+            elif y is None or int(y) == y and y > -1 and y <= max_class_column:
                 class_column = y
                 data_object = pyisc.DataObject(X,class_column=y)
 
-            if class_column > -1:
+            if class_column >= 0:
                 self.classes_ = data_object.classes_
 
             if data_object is not None:
-                return self.fit(data_object, y=class_column)
+                return self.fit(data_object)
 
         raise ValueError("Unknown type of data to fit X, y:", type(X), type(y))
 
@@ -310,26 +318,26 @@ class BaseISC:
         :return: self
         '''
 
-        if isinstance(X, pyisc._DataObject) and y is self.class_column:
+        if isinstance(X, pyisc.DataObject) and y is None and X.class_column == self.class_column:
             self._anomaly_detector._TrainDataIncrementally(X)
             return self
         elif isinstance(X, ndarray) or isinstance(X, list):
             data_object = self._convert_to_data_object_in_scoring(array(X), y)
 
             if data_object is not None:
-                return self.fit_incrementally(data_object,self.class_column)
+                return self.fit_incrementally(data_object)
 
         raise ValueError("Unknown type of data to fit X, y", type(X), type(y))
 
     def unfit_incrementally(self, X, y=None):
-        if isinstance(X, pyisc._DataObject) and y is self.class_column:
+        if isinstance(X, pyisc.DataObject) and y is None and X.class_column == self.class_column:
             self._anomaly_detector._UntrainDataIncrementally(X)
             return self
         elif isinstance(X, ndarray) or isinstance(X, list):
             data_object = self._convert_to_data_object_in_scoring(array(X), y)
 
             if data_object is not None:
-                return self.unfit_incrementally(data_object, self.class_column)
+                return self.unfit_incrementally(data_object)
 
         raise ValueError("Unknown type of data to fit X, y", type(X), type(y))
 

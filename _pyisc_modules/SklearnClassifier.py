@@ -24,6 +24,7 @@ classifiers (http://scikit-learn.org)
 
 from numpy import array, ndarray
 from numpy.ma.core import exp
+from numpy.ma.extras import unique
 from scipy.misc.common import logsumexp
 
 from sklearn.base import ClassifierMixin, BaseEstimator
@@ -77,57 +78,47 @@ class SklearnClassifier(BaseISC, BaseEstimator, ClassifierMixin):
         :param X: a numpy array or a pyisc DataObject
         :return: an array with a classification for each instance in X, an anomalous instance below given classification threshold is classified as None.
         '''
-        assert self.class_column > -1
 
-        if self.classification_threshold > -1:
-            self._anomaly_detector._SetParams(
-                0,
-                self.class_column,
-                self.classification_threshold,
-                1 if self.is_clustering else 0
-            )
+        probs = self.predict_log_proba(X)
 
-        if isinstance(X, pyisc._DataObject):
-            classes, clusters = self._anomaly_detector._ClassifyData(X, len(X), len(X)) # TODO clusters ignored for now
-            if self.classification_threshold > -1:
-                self._anomaly_detector._SetParams(
-                    0,
-                    self.class_column,
-                    self.anomaly_threshold,
-                    1 if self.is_clustering else 0
-                )
-            return [self.classes_.index(c) if c > -1 else None for c in classes]
-        elif isinstance(X, pyisc.DataObject):
-            return self.predict(X._as_super_class())
-        elif isinstance(X, ndarray):
-            data_object = self.\
-                _convert_to_data_object_in_scoring(
-                X,
-                y=(array([-1]*len(X)) if X.ndim == 2 and self.class_column == len(X[0]) or X.ndim == 1 and self.class_column == 1 else self.class_column) # An unknown class
-            )
-            if data_object is not None:
-                return self.predict(data_object)
-        elif isinstance(X, list):
-            return self.predict(array(X))
-
-        raise ValueError("Unknown type of data to score:", type(X) )
+        return array(self.classes_)[probs.argmax(1)]
 
 
     def predict_log_proba(self,X):
-        if isinstance(X, ndarray):
+        assert self.class_column > -1
+
+        X1 = None
+        if isinstance(X, pyisc.DataObject):
+            assert X.class_column == self.class_column
+            X1 = X.as_2d_array()
+        elif isinstance(X, ndarray):
+            X1 = X.copy()
+
+
+        if X1 is not None:
             logps = []
             for clazz in self.classes_:
-                data_object = self.\
-                    _convert_to_data_object_in_scoring(
-                    X,
-                    y=array([clazz]*len(X))
-                )
+                if X1.ndim == 2 and X1.shape[1] < self.class_column:
+                    X1.T[self.class_column] = array([clazz]*len(X1))
+                    data_object = self.\
+                        _convert_to_data_object_in_scoring(
+                        X1,
+                        y=self.class_column
+                    )
+                else:
+                    data_object = self.\
+                        _convert_to_data_object_in_scoring(
+                        X1,
+                        y=array([clazz]*len(X1))
+                    )
 
                 logps += [self._anomaly_detector._LogProbabilityOfData(data_object, len(X))]
 
-            LogPs = [x-logsumexp(x) for x in array(logps).T]
+            LogPs = [x-logsumexp(x) for x in array(logps).T] #normalized
 
             return array(LogPs)
+        else:
+            raise ValueError("Unknown type of data to score:", type(X))
 
     def predict_proba(self,X):
         Ps = exp(self.predict_log_proba(X))

@@ -182,6 +182,7 @@ from _pyisc_modules.BaseISC import *
 from _pyisc_modules.AnomalyDetector import *
 from _pyisc_modules.DataObject import DataObject
 from _pyisc_modules.SklearnClassifier import *
+from _pyisc_modules.SklearnClusterer import *
 from numpy import array, dtype, double
 
 

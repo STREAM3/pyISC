@@ -56,7 +56,7 @@ isclibraries = ["-Wall", "-O"]
 
 numpyincdir = get_numpy_include_dirs()
 
-py_modules = [os.path.join(pyisc_module_dir, src) for src in ["__init__","BaseISC", "AnomalyDetector","DataObject", "SklearnClassifier"]]+["pyisc"]
+py_modules = [os.path.join(pyisc_module_dir, src) for src in ["__init__","BaseISC", "AnomalyDetector","DataObject", "SklearnClassifier", "SklearnClusterer"]]+["pyisc"]
 
 
 pylib = get_python_lib()

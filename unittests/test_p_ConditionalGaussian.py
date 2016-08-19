@@ -77,7 +77,7 @@ class TestPConditionalGaussian(TestCase):
             anomaly_score(X)
 
     assert_equal((pearsonr(gauss_scores_X, condgauss_scores_X) > 0.98), True)
-    assert_allclose(gauss_scores_X, condgauss_scores_X, atol=3)  # Very bad
+    assert_allclose(gauss_scores_X, condgauss_scores_X, atol=5)  # Very bad
 
 
     # This is very much equal
@@ -110,3 +110,19 @@ class TestPConditionalGaussian(TestCase):
     assert_equal((pearsonr(condgauss_scores_X, condgauss_scores_X2) > 0.99), True) # Good
 
     assert_allclose(condgauss_scores_X2, condgauss_scores_X, atol=2) # Bad
+
+
+    #
+    ad1 = AnomalyDetector(
+        [P_Gaussian([i]) for i in range(len(X))],
+        cr_plus
+    ).fit(X)
+    s1 = ad1.anomaly_score(X)
+
+    ad2 = AnomalyDetector(
+        [P_ConditionalGaussian([i], []) for i in range(len(X))],
+        cr_plus
+    ).fit(X)
+    s2 = ad2.anomaly_score(X)
+
+    assert_allclose(s1, s2, rtol=0.01)  # OK

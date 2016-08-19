@@ -59,10 +59,7 @@ class DataObject(pyisc._DataObject):
         :return:
         '''
         self.class_column = class_column
-        if isinstance(X, pyisc._DataObject):
-            pyisc._DataObject.__init__(self,X.get_isc_data_object())
-            return
-        elif isinstance(X, pyisc.Format):
+        if isinstance(X, pyisc.Format):
             self._format = X
             pyisc._DataObject.__init__(self,X)
             return
@@ -111,8 +108,10 @@ class DataObject(pyisc._DataObject):
     def __getitem__(self,index):
         if index <= -1:
             index = self.size()+index
-        row_array1D = self._getRow(index, self.length())
-        return row_array1D
+        if index < self.length():
+            return self._getRow(index, self.length())
+        else:
+            return None
 
     def __len__(self):
         return self.size()

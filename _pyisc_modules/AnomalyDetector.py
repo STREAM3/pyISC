@@ -36,10 +36,10 @@ class AnomalyDetector(BaseISC):
         :param y: must be an array,list or None, cannot be a column_index as when fitting the data
         :return:
         '''
-        if isinstance(X, pyisc._DataObject):
+        if isinstance(X, pyisc.DataObject):
             return self._anomaly_detector._CalcAnomaly(X,X.size())
-        elif isinstance(X, ndarray):
-            data_object = self._convert_to_data_object_in_scoring(X, y)
+        elif isinstance(X, ndarray) or isinstance(X, list):
+            data_object = self._convert_to_data_object_in_scoring(array(X), y)
 
             if data_object is not None:
                 return self.anomaly_score(data_object)
