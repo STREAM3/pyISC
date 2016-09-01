@@ -8,13 +8,12 @@ from scipy.stats import norm
 from scipy.stats.stats import pearsonr
 from sklearn.utils import shuffle
 
-from _pyisc_modules import SklearnClusterer
 from pyisc import AnomalyDetector, \
     P_ConditionalGaussianDependencyMatrix, \
     P_ConditionalGaussianCombiner, \
     P_ConditionalGaussian, \
     P_Gaussian, cr_plus, cr_max, \
-    SklearnClassifier
+    SklearnClassifier, SklearnClusterer
 
 import pylab as plt
 
@@ -121,10 +120,16 @@ class TestPConditionalGaussianDependencyMatrix(TestCase):
         data = r_[data, U]
         labels = r_[labels, ['U']*len(U)]
 
-        ad = AnomalyDetector(P_ConditionalGaussianDependencyMatrix(range(length),length))
+        clusterer = SklearnClusterer(P_ConditionalGaussianDependencyMatrix(range(length),length))
+        clusterer.fit_anomaly_detector(data,10)
 
-        scores = SklearnClusterer(ad).make_scores(data,10)
+        plt.plot(range(1,len(clusterer.cluster_curve_)+1),clusterer.cluster_curve_)
 
-        plt.plot(range(1,len(scores)+1),scores.max(1))
+        import sklearn.datasets
 
+        iris = sklearn.datasets.load_iris()
 
+        clusterer_iris = SklearnClusterer(P_Gaussian(range(4)))
+        clusterer_iris.fit_anomaly_detector(iris['data'],20)
+
+        plt.plot(range(1,len(clusterer_iris.cluster_curve_)+1),clusterer_iris.cluster_curve_)
