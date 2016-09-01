@@ -263,6 +263,7 @@ class BaseISC:
         self.num_of_partitions = n
         self._anomaly_detector = _AnomalyDetector(off, splt, th, cl, output_combination_rule, comp_distributions);
 
+
     def fit(self, X, y=None):
         '''
         Train the anomaly detector using a DataObject or an array of arrays
