@@ -1,3 +1,4 @@
+import unittest
 from unittest import TestCase
 
 from numpy import  array,r_
@@ -30,7 +31,6 @@ def sample_markov_chain(length, noise=0.1):
     return sample
 
 class TestPConditionalGaussianDependencyMatrix(TestCase):
-
 
 
     def test_conditional_gaussian_dependency_matrix(self):
@@ -130,6 +130,9 @@ class TestPConditionalGaussianDependencyMatrix(TestCase):
         iris = sklearn.datasets.load_iris()
 
         clusterer_iris = SklearnClusterer(P_Gaussian(range(4)))
-        clusterer_iris.fit_anomaly_detector(iris['data'],20)
+        clusterer_iris.fit_anomaly_detector(iris['data'],10,n_repeat=50)
 
         plt.plot(range(1,len(clusterer_iris.cluster_curve_)+1),clusterer_iris.cluster_curve_)
+
+if __name__ == '__main__':
+    unittest.main()

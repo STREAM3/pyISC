@@ -118,7 +118,6 @@ void pyisc::_DataObject::_as1DArray(double* out_1DArray, int num_of_elements) {
 	for (int i = 0; i < num_of_rows; i++) {
 		vec = (*isc_data_obj)[i];
 		_convert_to_numpyarray(vec, (out_1DArray+num_of_columns*i), num_of_columns);
-
 	}
 }
 
@@ -145,6 +144,29 @@ void pyisc::_DataObject::_convert_to_numpyarray(intfloat* vec, double* out_1DArr
 	return isc_data_obj;
 }
 
+void _DataObject::set_column_values(int column_index, double* in_array1D, int num_of_columns) {
+	if(isc_data_obj->size() != num_of_columns) {
+		printf("Array is not of same size as column array");
+		return;
+	}
+	for(int index=0; index < isc_data_obj->size(); index++) {
+		switch(data_format->get_isc_format()->nth(column_index)->type()) {
+		case FORMATSPEC_DISCR:
+		case FORMATSPEC_SYMBOL:
+		case FORMATSPEC_BINARY:
+		case FORMATSPEC_UNKNOWN:
+		case FormatSpecDatetimeType:
+			(*isc_data_obj)[index][column_index].i = (int) in_array1D[index];
+			break;
+		case FORMATSPEC_CONT:
+			(*isc_data_obj)[index][column_index].f = (float) in_array1D[index];
+			break;
+		default:
+			printf("An unhandled isc format %i \n",data_format->get_isc_format()->nth(column_index)->type());
+		}
+	}
+}
+
 } /* namespace pyisc */
 
 void pyisc::_DataObject::_getRow(int row_index, double* out_1DArray,
@@ -160,3 +182,5 @@ void pyisc::_DataObject::_getRow(int row_index, double* out_1DArray,
 intfloat* pyisc::_DataObject::_get_intfloat(int index) {
 	return (*isc_data_obj)[index];
 }
+
+

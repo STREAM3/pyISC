@@ -63,7 +63,9 @@ class P_Gaussian(P_ProbabilityModel):
             self.column_index = [value_column]
 
     def create_micromodel(self):
-        self._saved_model = _IscMultiGaussianMicroModel(len(self.column_index), _to_cpp_array_int(self.column_index))
+        column_array = _to_cpp_array_int(self.column_index)
+        self._saved_model = _IscMultiGaussianMicroModel(len(self.column_index), column_array)
+        pyisc._free_array_int(column_array)
         return self._saved_model
 
 
@@ -142,6 +144,9 @@ class P_ConditionalGaussian(P_ProbabilityModel):
         self._saved_model = _IscMarkovGaussMicroModel(pred_index, len(self.prediction_column),
                                          cond_index, len(self.conditional_column))
 
+        pyisc._free_array_int(pred_index)
+        pyisc._free_array_int(cond_index)
+
         return self._saved_model
 
 class P_ConditionalGaussianCombiner(P_ProbabilityModel):
@@ -188,13 +193,15 @@ class P_ConditionalGaussianDependencyMatrix(P_ProbabilityModel):
         self.slots_per_row = elements_per_row
 
     def create_micromodel(self):
-        self._saved_model = _IscMarkovGaussMatrixMicroModel(_to_cpp_array_int(self.value_columns), len(self.value_columns), self.slots_per_row)
+        value_array = _to_cpp_array_int(self.value_columns)
+        self._saved_model = _IscMarkovGaussMatrixMicroModel(value_array, len(self.value_columns), self.slots_per_row)
+        pyisc._free_array_int(value_array)
         return self._saved_model
 
 class BaseISC:
     component_models = None
 
-    def __init__(self, component_models=P_Gaussian(0), output_combination_rule=cr_max, anomaly_threshold = 0.0, clustering = False):
+    def __init__(self, component_models=P_Gaussian(0), output_combination_rule=cr_max, anomaly_threshold = 0.0):
         '''
         The base class for all pyISC classes for statistical inference
 
@@ -204,8 +211,6 @@ class BaseISC:
         output from each model in component_model. Available combination rules are: cr_max and cr_plus.
         :param anomaly_threshold: the threshold at which a row in the input is considered a anomaly during training,
         might differ from what is used for anomaly decision.
-
-        :param clustering: boolean indicating whether to cluster the data.
         :return:
         '''
 
@@ -222,7 +227,7 @@ class BaseISC:
 
 
         self.anomaly_threshold = anomaly_threshold
-        self.is_clustering = clustering
+        self.is_clustering = False #clustering not used in the python wrapper since it does not seem to work in the C++ code.
         self.output_combination_rule = output_combination_rule
 
         #//AnomalyDetector(int n, int off, int splt, double th, int cl); // Sublasses must know the numbers and types of micromodels
@@ -243,7 +248,7 @@ class BaseISC:
         splt = -1
 
         th = anomaly_threshold
-        cl = 1 if clustering else 0
+        cl = 1 if self.is_clustering else 0
 
         if isinstance(component_models, P_ProbabilityModel):
             n = 1
@@ -276,6 +281,9 @@ class BaseISC:
         if isinstance(X, pyisc.DataObject) and y is None:
             assert y is None # Contained in the data object
             self.class_column = X.class_column
+            if self.class_column >= 0:
+                self.classes_ = X.classes_
+
             self._anomaly_detector._SetParams(
                 0,
                 -1 if X.class_column is None else X.class_column,
@@ -297,11 +305,8 @@ class BaseISC:
                 class_column = max_class_column
                 data_object = pyisc.DataObject(numpy.c_[X, y], class_column=class_column)
             elif y is None or int(y) == y and y > -1 and y <= max_class_column:
-                class_column = y
+                self.class_column = y
                 data_object = pyisc.DataObject(X,class_column=y)
-
-            if class_column >= 0:
-                self.classes_ = data_object.classes_
 
             if data_object is not None:
                 return self.fit(data_object)

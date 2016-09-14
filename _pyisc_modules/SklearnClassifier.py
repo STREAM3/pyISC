@@ -20,7 +20,7 @@ classifiers (http://scikit-learn.org)
 # You should have received a copy of the GNU Lesser General Public License
 # along with this code.  If not, see <http://www.gnu.org/licenses/>.
 # --------------------------------------------------------------------------
-
+from _pyisc import _AnomalyDetector__ClassifyData
 
 from numpy import array, ndarray
 from numpy.ma.core import exp
@@ -28,7 +28,7 @@ from numpy.ma.extras import unique
 from scipy.misc.common import logsumexp
 
 from sklearn.base import ClassifierMixin, BaseEstimator
-from pyisc import P_Gaussian, BaseISC, cr_max
+from pyisc import P_Gaussian, BaseISC, cr_max, _AnomalyDetector
 import pyisc
 
 
@@ -38,8 +38,7 @@ class SklearnClassifier(BaseISC, BaseEstimator, ClassifierMixin):
     def __init__(self, component_models=P_Gaussian(0),
                  classification_threshold=1e12,
                  output_combination_rule=cr_max,
-                 training_anomaly_threshold = 0.0,
-                 clustering = False):
+                 training_anomaly_threshold = 0.0):
 
         '''
 
@@ -48,7 +47,7 @@ class SklearnClassifier(BaseISC, BaseEstimator, ClassifierMixin):
         :return:
         '''
         self.classification_threshold = classification_threshold
-        super(SklearnClassifier, self).__init__(component_models,output_combination_rule,training_anomaly_threshold,clustering)
+        super(SklearnClassifier, self).__init__(component_models,output_combination_rule,training_anomaly_threshold)
 
     @staticmethod
     def clf(anomaly_detector,classification_threshold=1e12):
@@ -80,8 +79,26 @@ class SklearnClassifier(BaseISC, BaseEstimator, ClassifierMixin):
         '''
 
         probs = self.predict_log_proba(X)
-
         return array(self.classes_)[probs.argmax(1)]
+
+        # assert self.class_column > -1
+        #
+        # DO = None
+        # if isinstance(X, pyisc.DataObject):
+        #     assert X.class_column == self.class_column
+        #     DO = X
+        # elif isinstance(X, ndarray):
+        #     if self.class_column == len(X[0]):
+        #         DO = self._convert_to_data_object_in_scoring(X, [None]*len(X))
+        #     else:
+        #         X1 = X.copy()
+        #         X1.T[self.class_column] = None
+        #         DO = self._convert_to_data_object_in_scoring(X1, self.class_column)
+        #
+        # class_ids, _ = self._anomaly_detector._ClassifyData(DO, len(X), len(X))
+        #
+        # return array(self.classes_)[class_ids]#[probs.argmax(1)]
+
 
 
     def predict_log_proba(self,X):
@@ -98,7 +115,7 @@ class SklearnClassifier(BaseISC, BaseEstimator, ClassifierMixin):
         if X1 is not None:
             logps = []
             for clazz in self.classes_:
-                if X1.ndim == 2 and X1.shape[1] < self.class_column:
+                if X1.ndim == 2 and self.class_column >= 0 and self.class_column < X1.shape[1]:
                     X1.T[self.class_column] = array([clazz]*len(X1))
                     data_object = self.\
                         _convert_to_data_object_in_scoring(

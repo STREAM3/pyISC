@@ -93,7 +93,7 @@ class AnomalyDetector(BaseISC):
         self._anomaly_detector._CalcAnomalyDetails(x_intfloat,anom, cla, clu, deviations, peak, min, max)
 
         if self.is_clustering and self.class_column > -1:
-            return [pyisc._get_double_value(anom,0),
+            result = [pyisc._get_double_value(anom,0),
                     pyisc._get_int_value(cla,0),
                     pyisc._get_int_value(clu,0),
                     list(pyisc._to_numpy_array(deviations,self.num_of_partitions)),
@@ -101,22 +101,33 @@ class AnomalyDetector(BaseISC):
                     list(data_object._convert_to_numpyarray(min, length)),
                     list(data_object._convert_to_numpyarray(max, length))]
         elif self.is_clustering:
-            return [pyisc._get_double_value(anom,0),
+            result = [pyisc._get_double_value(anom,0),
                     pyisc._get_int_value(clu,0),
                     list(pyisc._to_numpy_array(deviations,self.num_of_partitions)),
                     list(data_object._convert_to_numpyarray(peak, length)),
                     list(data_object._convert_to_numpyarray(min, length)),
                     list(data_object._convert_to_numpyarray(max, length))]
         elif self.class_column > -1:
-            return [pyisc._get_double_value(anom,0),
+            result = [pyisc._get_double_value(anom,0),
                     pyisc._get_int_value(cla,0),
                     list(pyisc._to_numpy_array(deviations,self.num_of_partitions)),
                     list(data_object._convert_to_numpyarray(peak, length)),
                     list(data_object._convert_to_numpyarray(min, length)),
                     list(data_object._convert_to_numpyarray(max, length))]
         else:
-            return [pyisc._get_double_value(anom,0),
+            result = [pyisc._get_double_value(anom,0),
                     list(pyisc._to_numpy_array(deviations,self.num_of_partitions)),
                     list(data_object._convert_to_numpyarray(peak, length)),
                     list(data_object._convert_to_numpyarray(min, length)),
                     list(data_object._convert_to_numpyarray(max, length))]
+
+        pyisc._free_array_double(deviations);
+        pyisc._free_array_intfloat(min)
+        pyisc._free_array_intfloat(max)
+        pyisc._free_array_intfloat(peak)
+        pyisc._free_array_double(anom)
+        pyisc._free_array_int(cla)
+        pyisc._free_array_int(clu)
+
+
+        return result

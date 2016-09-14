@@ -103,6 +103,11 @@ public:
 
 	virtual intfloat* _get_intfloat(int index);
 
+	/**
+	 * Takes a numpy array and sets it values as the given column values.
+	 */
+	virtual void set_column_values(int column_index, double* in_array1D, int num_of_columns);
+
 protected:
 	void init(pyisc::Format* format);
 

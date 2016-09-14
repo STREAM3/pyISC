@@ -97,18 +97,35 @@ class DataObject(pyisc._DataObject):
         pyisc._DataObject.__init__(self,X)
 
     def as_1d_array(self):
-        array1D = self._as1DArray(self.size()*self.length())
+        array1D = self._as1DArray(self.size()*self.length()).astype(object)
+
+        #print self.class_column, self.classes_, unique(array1D[range(self.class_column,len(array1D),self.length())])
+        if self.class_column is not None:
+            array1D[range(self.class_column,len(array1D),self.length())] = \
+                [self.classes_[int(c)] if int(c) != -1 else None for c in array1D[range(self.class_column,len(array1D),self.length())] ]
+
         return array1D
 
     def as_2d_array(self):
         array1D = self.as_1d_array()
         return array1D.reshape((self.size(),self.length()))
 
+    def set_column_values(self, column_index, values):
+        '''
+        Sets all values in a column, if the column is the class column, then the values must be one of the ones provieded in the constructor.
+        :param column_index:
+        :param values:
+        :return:
+        '''
+        if column_index == self.class_column:
+            values = [self.classes_.index(c) for c in values]
+        pyisc._DataObject.set_column_values(self, column_index, array(values).astype(float))
+
 
     def __getitem__(self,index):
         if index <= -1:
             index = self.size()+index
-        if index < self.length():
+        if index < self.size():
             return self._getRow(index, self.length())
         else:
             return None

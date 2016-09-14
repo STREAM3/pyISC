@@ -49,6 +49,10 @@
      return (int **) new int*[size];
   }
 
+  void _free_array_int_pointer(int** array, int length) {
+    delete [] array;
+  }
+
   void _set_int_array(int** array2D, int index, int*array1D) {
      array2D[index] = array1D;
   }
@@ -74,6 +78,10 @@
   	return (intfloat*) new intfloat[size];
   }
 
+  void _free_array_intfloat(intfloat* array) {
+    delete [] array;
+}
+
    float _get_intfloat_value(intfloat *array1, int index) {
   	return (float) array1[index];
   }
@@ -97,6 +105,10 @@
 	return out_array;
  }
 
+ void _free_array_double(double* array) {
+    delete [] array;
+}
+
    int* _to_cpp_array_int(int* IN_ARRAY1, int DIM1) {
 	int* out_array = new int[DIM1];
 	for(int i=0; i < DIM1; i++) {
@@ -105,6 +117,10 @@
 
 	return out_array;
  }
+
+void _free_array_int(int* array) {
+    delete [] array;
+}
  
    void _to_numpy_array_double(double* inarray, double* ARGOUT_ARRAY1, int DIM1) {
 	for(int i=0; i < DIM1; i++) {
@@ -180,7 +196,7 @@
  %pythoncode %{
 from _pyisc_modules.BaseISC import *
 from _pyisc_modules.AnomalyDetector import *
-from _pyisc_modules.DataObject import DataObject
+from _pyisc_modules.DataObject import *
 from _pyisc_modules.SklearnClassifier import *
 from _pyisc_modules.SklearnClusterer import *
 from numpy import array, dtype, double

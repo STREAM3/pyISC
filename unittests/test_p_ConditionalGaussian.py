@@ -1,3 +1,4 @@
+import unittest
 from unittest import TestCase
 
 from numpy.lib.index_tricks import c_
@@ -126,3 +127,6 @@ class TestPConditionalGaussian(TestCase):
     s2 = ad2.anomaly_score(X)
 
     assert_allclose(s1, s2, rtol=0.01)  # OK
+
+if __name__ == '__main__':
+    unittest.main()
