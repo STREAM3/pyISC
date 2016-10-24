@@ -26,6 +26,7 @@
 #include <cmath>
 #endif
 
+
 /**
  * This is a function used to create a micro model for a given mixture component
  *
@@ -121,9 +122,11 @@ void _AnomalyDetector::_CalcAnomaly(class _DataObject* d,  double* deviations, i
 void _AnomalyDetector::_ClassifyData(class _DataObject* d, int* class_ids, int class_ids_length,
 		int* cluster_ids, int cluster_ids_length) {
 	if(	class_ids_length !=  d->size() && cluster_ids_length !=  d->size()) {
-		printf("Wrong number of clasess or clusters");
+		printf("Wrong number of classes or clusters");
 	}
+
 	::AnomalyDetector::ClassifyData(d->get_isc_data_object(), class_ids, cluster_ids);
+
 }
 
 int _AnomalyDetector::_CalcAnomalyDetails(union intfloat* vec,

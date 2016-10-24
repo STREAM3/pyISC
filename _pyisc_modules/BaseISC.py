@@ -198,7 +198,7 @@ class P_ConditionalGaussianDependencyMatrix(P_ProbabilityModel):
         pyisc._free_array_int(value_array)
         return self._saved_model
 
-class BaseISC:
+class BaseISC(object):
     component_models = None
 
     def __init__(self, component_models=P_Gaussian(0), output_combination_rule=cr_max, anomaly_threshold = 0.0):
@@ -359,3 +359,29 @@ class BaseISC:
 
     def reset(self):
         self._anomaly_detector._Reset();
+
+
+    def compute_logp(self, X1):
+        if self.class_column is not None and not isinstance(X1, pyisc._DataObject):
+            if X1.ndim == 2 and self.class_column >= 0 and self.class_column < X1.shape[1]:
+                data_object = self. \
+                    _convert_to_data_object_in_scoring(
+                    X1,
+                    y=self.class_column
+                )
+            else:
+                data_object = self. \
+                    _convert_to_data_object_in_scoring(
+                    X1,
+                    y=array([None] * len(X1))
+                )
+            logps = []
+            for clazz in self.classes_:
+                pyisc._DataObject.set_column_values(data_object, self.class_column, [clazz] * len(data_object))
+
+                logps += [self._anomaly_detector._LogProbabilityOfData(data_object, len(X1))]
+
+            return logps
+        else:
+            data_object = pyisc.DataObject(X1) if not isinstance(X1, pyisc._DataObject) else X1
+            return self._anomaly_detector._LogProbabilityOfData(data_object, len(X1))

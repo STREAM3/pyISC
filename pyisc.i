@@ -199,6 +199,7 @@ from _pyisc_modules.AnomalyDetector import *
 from _pyisc_modules.DataObject import *
 from _pyisc_modules.SklearnClassifier import *
 from _pyisc_modules.SklearnClusterer import *
+from _pyisc_modules.SklearnOutlierDetector import *
 from numpy import array, dtype, double
 
 

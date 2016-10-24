@@ -113,29 +113,15 @@ class SklearnClassifier(BaseISC, BaseEstimator, ClassifierMixin):
 
 
         if X1 is not None:
-            logps = []
-            for clazz in self.classes_:
-                if X1.ndim == 2 and self.class_column >= 0 and self.class_column < X1.shape[1]:
-                    X1.T[self.class_column] = array([clazz]*len(X1))
-                    data_object = self.\
-                        _convert_to_data_object_in_scoring(
-                        X1,
-                        y=self.class_column
-                    )
-                else:
-                    data_object = self.\
-                        _convert_to_data_object_in_scoring(
-                        X1,
-                        y=array([clazz]*len(X1))
-                    )
 
-                logps += [self._anomaly_detector._LogProbabilityOfData(data_object, len(X))]
+            logps = self.compute_logp(X1)
 
             LogPs = [x-logsumexp(x) for x in array(logps).T] #normalized
 
             return array(LogPs)
         else:
             raise ValueError("Unknown type of data to score:", type(X))
+
 
     def predict_proba(self,X):
         Ps = exp(self.predict_log_proba(X))

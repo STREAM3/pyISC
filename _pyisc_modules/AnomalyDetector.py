@@ -20,7 +20,7 @@ The Python Wrapper of all ISC anomaly scoring methods.
 # along with this code.  If not, see <http://www.gnu.org/licenses/>.
 # --------------------------------------------------------------------------
 
-from numpy import ndarray, array
+from numpy import ndarray, array, log, inf
 
 from pyisc import BaseISC
 
@@ -36,6 +36,7 @@ class AnomalyDetector(BaseISC):
         :param y: must be an array,list or None, cannot be a column_index as when fitting the data
         :return:
         '''
+
         if isinstance(X, pyisc.DataObject):
             return self._anomaly_detector._CalcAnomaly(X,X.size())
         elif isinstance(X, ndarray) or isinstance(X, list):

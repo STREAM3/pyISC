@@ -1,13 +1,43 @@
+"""
+The Python Wrapper of all ISC classification methods that is compatible with scikit-learn
+classifiers (http://scikit-learn.org)
+"""
+# --------------------------------------------------------------------------
+# Copyright (C) 2014, 2015, 2016 SICS Swedish ICT AB
+#
+# Main author: Tomas Olsson <tol@sics.se>
+#
+# This code is free software: you can redistribute it and/or modify it
+# under the terms of the GNU Lesser General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This code is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this code.  If not, see <http://www.gnu.org/licenses/>.
+# --------------------------------------------------------------------------
+
 from pyisc import SklearnClassifier, AnomalyDetector, DataObject
-from numpy import  array, mod, unique, sqrt, inf, mean,std, c_
+from numpy import  array, mod, unique, sqrt, inf, mean,std, c_, argmin
 from sklearn.utils import shuffle
 
 class SklearnClusterer:
     '''
+    Sets the maximum number of iterations that is used when doing clustering for each number of clusters.
+    '''
+    max_num_of_iterations = 1000
+
+    '''
     TODO fix bug when calling fit.. with init_clusters
     '''
-    def __init__(self,*anomaly_detector_params):
-        self.ad_parms = anomaly_detector_params
+    def __init__(self,*anomaly_detector_params0, **anomaly_detector_params1):
+        self.ad_parms0 = anomaly_detector_params0
+        self.ad_parms1 = anomaly_detector_params1
+
         '''The scores computed by the last call to method make_score'''
         self.scores = None
         '''The cluster selected for each data point'''
@@ -15,7 +45,8 @@ class SklearnClusterer:
         '''Contains the value for each cluster used by the elbow method for selecting best cluster'''
         self.cluster_curve_ = None
 
-    def make_scores(self,X, max_k, start_k=2):
+
+    def make_scores(self,X, max_k, start_k=2,verbose=False):
         '''
         Returns an array of the individual anomaly scores for each example for number of each clusters.
         :param X: array of arrays or DataObject
@@ -23,26 +54,27 @@ class SklearnClusterer:
         :param start_k: start clustering  start_k to max_k (inclusive) number of clusters.
         :return: array of array of anomaly scores for each k from 1 to max_k (inclusive)
         '''
-        ad = AnomalyDetector(*self.ad_parms)
-
-
+        ad = AnomalyDetector(*self.ad_parms0, **self.ad_parms1)
         ad.fit(X)
         score = ad.anomaly_score(X)
         scores = [list(score)]
-        print "Clusters", 1, "Score", score[score < inf].std(), sum(score == inf)
+
+        if verbose:
+            print "Clusters", 1, "Score", score[score < inf].std(), sum(score == inf)
 
         for k in range(start_k,max_k+1):
-            clusters = self._train_clf(ad, X, k)
+            clusters = self._train_clf(ad, X, k,verbose=verbose)
 
             score = ad.anomaly_score(X, clusters)
             scores += [list(score)]
-            print "Clusters", k, "Score",  score[score < inf].std(), sum(score == inf)
+            if verbose:
+                print "Clusters", k, "Score",  score[score < inf].std(), sum(score == inf)
 
         self.scores = array(scores)
 
         return self.scores
 
-    def _train_clf(self, ad, X, k=None, default_labels=None):
+    def _train_clf(self, ad, X, k=None, default_labels=None,verbose=False):
         '''
 
         :param ad: anomaly detector that shall be trained
@@ -54,12 +86,17 @@ class SklearnClusterer:
         cluster_labels = default_labels
 
         count_equal_movements = 0
-        old_movements = -1
+        num_of_last_movements = 5 # the last 5 number of moments are stored stored
+        last_movements = [-1 for _ in range(num_of_last_movements)]
+        num_of_iterations = 0
 
         while True:
             if cluster_labels is None: # Restart the clustering
                 cluster_labels = array(shuffle(mod(array(range(len(X))), k)))
-                print unique(cluster_labels)
+                last_movements = [-1 for _ in range(num_of_last_movements)]
+                num_of_iterations = 0
+                if verbose:
+                    print unique(cluster_labels)
 
             ad.fit(X, cluster_labels)
             clf = SklearnClassifier.clf(ad)
@@ -67,26 +104,29 @@ class SklearnClusterer:
 
             movements = sum((cluster_labels_new != cluster_labels) * 1.0)
 
-            if old_movements == movements:
+            if movements in last_movements:
                 count_equal_movements += 1
             else:
                 count_equal_movements = 0
+                last_movements = last_movements[1:]+[movements]
 
-            if count_equal_movements >= 10: # Restart the clustering if the number of equal movements are greater or more equal than 10
+            if count_equal_movements >= 20 or num_of_iterations > self.max_num_of_iterations: # Restart the clustering if the number of movements in last_movements are greater or more equal than 20
                 cluster_labels = None
                 continue
 
-            print "movements", movements
+            if verbose:
+                print "movements", movements
 
             if movements == 0:
                 break
 
             cluster_labels = cluster_labels_new
-            old_movements = movements
+
+            num_of_iterations += 1
 
         return cluster_labels
 
-    def fit_anomaly_detector(self, X, max_k=2, n_repeat=10, scores=None, use_k=None, init_clusters=None):
+    def fit_anomaly_detector(self, X, max_k=2, n_repeat=10, scores=None, use_k=None, init_clusters=None, verbose=False):
         '''
         The method uses a variation of the elbow curve to select the number of clusters based on the maximum individual
         anomaly score for each cluster computed by the make_scores method.
@@ -96,6 +136,7 @@ class SklearnClusterer:
         :param scores: an array of arrays with anomaly scores, to use for fitting instead of calling make_scores. Each array corresponds contains 1 or more calls to make_scores for a k number of clusters. For each index i in range(len(scores)) means k=i+1.
         :param use_k: if set, no autmatic selection is made, instead the value of use_k is used as number of clusters
         :param init_clusters: the clustering is initialized with the provided clusters. scores, use_k and n_repeat are ignored.
+        :param verbose: print progress info
         :return: the anomaly detector with parameters provided in the constructor fitted to the data with the best number of clusters tested
         '''
 
@@ -105,7 +146,7 @@ class SklearnClusterer:
                 ss = []
                 if scores is None:
                     for n in xrange(n_repeat):
-                        self.make_scores(X, max_k)
+                        self.make_scores(X, max_k,verbose=verbose)
                         ss.append(map(lambda s: std(s[s<inf]), self.scores))
                 else:
                     ss = [map(lambda s: std(s[s<inf]), scores[i]) for i in range(len(scores))]
@@ -114,11 +155,19 @@ class SklearnClusterer:
             else:
                 best_k = use_k
 
-        ad = AnomalyDetector(*self.ad_parms)
+        ad_list = []
+        scores = []
+        for i in range(n_repeat):
+            ad = AnomalyDetector(*self.ad_parms0, **self.ad_parms1)
+            self.clustering_ = self._train_clf(ad, X, best_k,init_clusters)
+            ad_scores = ad.anomaly_score(X, self.clustering_)
+            scores.append(ad_scores[ad_scores < inf].std())
+            ad_list.append(ad)
 
-        self.clustering_ = self._train_clf(ad, X, best_k,init_clusters)
+        best_ad = ad_list[argmin(scores)]
 
-        print "best k", best_k
+        if verbose:
+            print "best k", best_k
 
         if use_k:
             self.cluster_curve_ = None
