@@ -1,11 +1,14 @@
 # pyISC 
 
-The Python API to the ISC anomaly detection and classification framework.
+The Python API to the ISC anomaly detection and classification framework. The framework implements Baysian statistical methods for anomnaly detetcion and classification. Currently supported statistical models are: Possion, Gamma and multivariate Gaussian distributions.
 
+### Email forum(s)
+
+Questions regarding the use of the framework: https://groups.google.com/forum/#!forum/pyisc-users
 
 ##Prerequisite:
 
-Notice, pyISC/visISC is only been tested on 64 bits machines.
+Notice, pyISC/visISC has only been tested using 64 bit Python.
 
 ###Install Python distribution 
 
@@ -15,11 +18,14 @@ Anaconda is the recommended Python distribution : https://www.continuum.io/downl
 
 Libraries: 
 - numpy (required for running pyisc)
-- ipython, jupyter, pandas, scikit-learn (only required for running tutorial examples)
-           
-Install with anacond:  
+- matplotlib, ipython, jupyter, pandas, scikit-learn (only required for running tutorial examples)
+
+Install with anaconda:  
+
+(If you want to disable ssl verification when installing, you will find the instructions <a href="https://docs.continuum.io/anaconda-repository/faq#how-do-i-disable-ssl-checking-on-package-installation">here</a>.)
 
 `>> conda install numpy pandas scikit-learn  ipython jupyter`
+
 
 If you intend to also install visISC, you have to downgrade the numpy installation to version 1.9
 
@@ -30,6 +36,10 @@ If you intend to also install visISC, you have to downgrade the numpy installati
 Windows:
 
 `>> conda install mingw libpython`
+
+OS X:
+
+Install the Xcode developer tools from App Store.
 
 ###Install Swig
 
@@ -44,7 +54,11 @@ OS X:
 `>> conda install --channel https://conda.anaconda.org/minrk swig`
 
 
-## Installation:
+## Installation
+
+For installing from source code, you need a <a href="https://git-scm.com/downloads">git client</a>
+
+Then:
 
 `>> git clone https://github.com/STREAM3/pyisc --recursive`
 
