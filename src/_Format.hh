@@ -42,6 +42,7 @@ public:
 	void add(const char* str) {_isc_format->add(str);};
 	::FormatSpec *_isc_format;
 };
+
 class Format {
 	int is_format_created = 0;
 
@@ -68,6 +69,9 @@ public:
 	 */
 	virtual void addColumn(const char *name, ColumnType type);
 
+	/**
+	 * TODO memory leak!
+	 */
 	virtual FormatSpec* get_nth_column(int n) {return new FormatSpec(isc_format->nth(n));};
 	virtual FormatSpec* nth(int n) {return get_nth_column(n);};
 	virtual void add(FormatSpec*);

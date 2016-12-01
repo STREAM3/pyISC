@@ -28,60 +28,12 @@
 #include <isc_micromodel.hh>
 #include <anomalydetector.hh>
 #include "_DataObject.hh"
+#include <isc_micromodel_markovgaussian.hh>
+#include <vector>
 
 
 namespace pyisc {
 
-enum IscDistribution {Gaussian, Poisson, PoissonOneside, Exponential, Gamma, CondionalGaussian, CondionalGaussianCombiner};
-
-class IscMicroModelCreator {
-protected:
-	IscMicroModel** components;
-	int size_;
-public:
-	IscMicroModelCreator(int size) {
-		components = new IscMicroModel*[size];
-		this->size_ = size;
-	}
-
-	// Add a component by creating a copy with same constructor arguments
-	void add(int index, IscMicroModel* component) {
-		components[index] = component->create();
-	}
-
-	~IscMicroModelCreator(){
-		for(int i=0; i < size_; i++) {
-			if(components[i]) {
-				delete components[i];
-			}
-		}
-		if(components) {
-			delete [] components;
-		}
-	}
-
-	// Create a copy with created components
-	IscMicroModelCreator* create() {
-		IscMicroModelCreator* array = new IscMicroModelCreator(size_);
-		for(int i=0; i < size_; i++) {
-			if(components[i]) {
-				array->add(i,components[i]);
-			}
-		}
-		return array;
-	}
-
-	// Create a component for given index
-	virtual IscMicroModel* create_component(int index) {
-		return components[index]->create();
-
-	}
-
-	virtual int size() {
-		return this->size_;
-	}
-
-};
 
 class _AnomalyDetector : ::AnomalyDetector {
 public:
@@ -91,7 +43,7 @@ public:
 			double th,
 			int cl,
 			::IscCombinationRule cr,
-			 IscMicroModelCreator*);
+			 std::vector<IscMicroModel*> vector);
 	/**
 	 * n is number of isc mixture components
 	 * off is the first column containing features used by the detector
@@ -113,8 +65,11 @@ public:
 	virtual void _SetParams(int off, int splt, double th, int cl);
 	virtual void _Reset();
 	virtual void _TrainOne(Format* format, double* in_array1D, int num_of_columns);
+	virtual void _UntrainOne(Format* format, double* in_array1D, int num_of_columns);
 	virtual void _TrainData(_DataObject* d);
 	virtual void _TrainDataIncrementally(_DataObject* d);
+	virtual void _UntrainDataIncrementally(_DataObject* d);
+
 	virtual void _CalcAnomaly(class _DataObject* d, double* deviations, int deviations_length);
 	virtual void _ClassifyData(class _DataObject* d, int* class_ids, int class_ids_length, int* cluster_ids, int cluster_ids_length);
 
@@ -136,7 +91,7 @@ public:
 	virtual void _LogProbabilityOfData(class _DataObject* d, double* logp, int size);
 
 private:
-	IscMicroModelCreator* component_distribution_creators;
+	std::vector<IscMicroModel*> component_distribution_creators;
 };
 
 

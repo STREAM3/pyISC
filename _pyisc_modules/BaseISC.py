@@ -22,21 +22,26 @@ The Python Wrapper of all ISC anomaly detector training methods.
 from _pyisc import _to_cpp_array
 from abc import abstractmethod
 import numpy
-from numpy import ndarray
+from numpy import ndarray, array
 from pyisc import _to_cpp_array_int, _AnomalyDetector, \
     _IscMultiGaussianMicroModel, \
     _IscPoissonMicroModel, \
     _IscPoissonMicroModelOneside, \
-    _IscMicroModelCreator, _IscGammaMicroModel, _IscExponentialMicroModel
+    _IscMicroModelVector, _IscGammaMicroModel, \
+    _IscMarkovGaussMicroModel, \
+    _IscMarkovGaussMicroModelVector, \
+    _IscMarkovGaussCombinerMicroModel, \
+    _IscMarkovGaussMatrixMicroModel
 import pyisc
 
 __author__ = 'tol'
 
+cr_min = pyisc.IscMin
 cr_max = pyisc.IscMax
 cr_plus= pyisc.IscPlus
 
 class P_ProbabilityModel:
-    column_index=None
+    _saved_model = None
     @abstractmethod
     def __init__(self):
         pass
@@ -59,7 +64,11 @@ class P_Gaussian(P_ProbabilityModel):
             self.column_index = [value_column]
 
     def create_micromodel(self):
-        return _IscMultiGaussianMicroModel(len(self.column_index), _to_cpp_array_int(self.column_index))
+        column_array = _to_cpp_array_int(self.column_index)
+        self._saved_model = _IscMultiGaussianMicroModel(len(self.column_index), column_array)
+        pyisc._free_array_int(column_array)
+        return self._saved_model
+
 
 class P_Poisson(P_ProbabilityModel):
 
@@ -75,7 +84,8 @@ class P_Poisson(P_ProbabilityModel):
 
 
     def create_micromodel(self):
-        return _IscPoissonMicroModel(self.column_index[0], self.column_index[1])
+        self._saved_model = _IscPoissonMicroModel(self.column_index[0], self.column_index[1])
+        return self._saved_model
 
 
 class P_PoissonOnesided(P_ProbabilityModel):
@@ -93,7 +103,8 @@ class P_PoissonOnesided(P_ProbabilityModel):
 
 
     def create_micromodel(self):
-        return _IscPoissonMicroModelOneside(self.column_index[0], self.column_index[1])
+        self._saved_model = _IscPoissonMicroModelOneside(self.column_index[0], self.column_index[1])
+        return self._saved_model
 
 
 class P_Gamma(P_ProbabilityModel):
@@ -111,20 +122,96 @@ class P_Gamma(P_ProbabilityModel):
         self.period_column = period_column
 
     def create_micromodel(self):
-        return _IscGammaMicroModel(self.frequency_column,self.period_column)
+        self._saved_model =  _IscGammaMicroModel(self.frequency_column,self.period_column)
+        return self._saved_model
+
+class P_ConditionalGaussian(P_ProbabilityModel):
+
+    def __init__(self, prediction_column, conditional_column):
+        '''
+        Implements a conditional multivariate Gaussian distribution.
+
+        :param prediction_column: an integer or an list of integers
+        :param condition_column: an integer or an list of integers
+        '''
+
+        self.prediction_column = prediction_column
+        self.conditional_column = conditional_column
 
 
-class BaseISC:
+    def create_micromodel(self):
+        pred_index = _to_cpp_array_int(self.prediction_column)
+        cond_index= _to_cpp_array_int(self.conditional_column)
+        self._saved_model = _IscMarkovGaussMicroModel(pred_index, len(self.prediction_column),
+                                         cond_index, len(self.conditional_column))
 
-    def __init__(self, component_models=P_Gaussian(0), output_combination_rule=cr_max, anomaly_threshold = 0.0, clustering = False):
+        pyisc._free_array_int(pred_index)
+        pyisc._free_array_int(cond_index)
+
+        return self._saved_model
+
+class P_ConditionalGaussianCombiner(P_ProbabilityModel):
+
+    def __init__(self, gaussian_components):
+        '''
+        Combines the contributions from conditionally independent multivariate conditional Gaussian distributions, so that
+        a Bayesian belief net or Markov chain can be created. The components must form a directed acyclic graph.
+
+        :param gaussian_components: a single P_ConditionalGauss or a list of P_ConditionalGauss.
+        '''
+
+        assert isinstance(gaussian_components, P_ConditionalGaussian) or \
+               isinstance(gaussian_components,list) and \
+               all([isinstance(comp, P_ConditionalGaussian) for comp in gaussian_components])
+
+        self.gaussian_components = gaussian_components
+
+    def create_micromodel(self):
+        num_of_components = len(self.gaussian_components)
+        creator = _IscMarkovGaussMicroModelVector()
+        for i in range(num_of_components):
+            creator.push_back(self.gaussian_components[i].create_micromodel())
+        ptr_creator = pyisc._to_pointer(creator)
+        self._saved_model = _IscMarkovGaussCombinerMicroModel(ptr_creator, num_of_components)
+        pyisc._free_pointer(ptr_creator)
+        return self._saved_model
+
+class P_ConditionalGaussianDependencyMatrix(P_ProbabilityModel):
+
+    def __init__(self, value_columns, elements_per_row):
+        '''
+        Creates a dependency matrix where each element is only dependent on its right neighbour and the element directly
+        below in all cases where they are present. Otherwise the elements are only dependent on the element of the two
+        neighbours that is present, or no element.
+
+        :param value_columns: the column indexes that are contained in the matrix as a sequence of the elements
+        from left to the right and from the first row to the last row.
+        :param elements_per_row: the number of column indexes (elements) that constitutes a row in the matrix,
+        all rows are equally long.
+        '''
+
+        self.value_columns = value_columns
+        self.slots_per_row = elements_per_row
+
+    def create_micromodel(self):
+        value_array = _to_cpp_array_int(self.value_columns)
+        self._saved_model = _IscMarkovGaussMatrixMicroModel(value_array, len(self.value_columns), self.slots_per_row)
+        pyisc._free_array_int(value_array)
+        return self._saved_model
+
+class BaseISC(object):
+    component_models = None
+
+    def __init__(self, component_models=P_Gaussian(0), output_combination_rule=cr_max, anomaly_threshold = 0.0):
         '''
         The base class for all pyISC classes for statistical inference
 
-        :param component_models: a statistical model reused for all mixture components, or an list of statistical models. Available statistical models are: P_Gaussian, P_Poisson, P_PoissonOneside.
-        :param output_combination_rule: an input defining which type of rule to use for combining the anomaly score output from each model in component_model. Available combination rules are: cr_max and cr_plus.
-        :param anomaly_threshold: the threshold at which a row in the input is considered a anomaly during training, might differ from what is used for anomaly decision.
-
-        :param clustering: boolean indicating whether to cluster the data.
+        :param component_models: a statistical model reused for all mixture components, or an list of statistical models.
+        Available statistical models are: P_Gaussian, P_Poisson, P_PoissonOneside.
+        :param output_combination_rule: an input defining which type of rule to use for combining the anomaly score
+        output from each model in component_model. Available combination rules are: cr_max and cr_plus.
+        :param anomaly_threshold: the threshold at which a row in the input is considered a anomaly during training,
+        might differ from what is used for anomaly decision.
         :return:
         '''
 
@@ -136,12 +223,13 @@ class BaseISC:
         assert isinstance(component_models, P_ProbabilityModel) or \
                isinstance(component_models, list) and len(component_models) > 0 and \
                all([isinstance(m, P_ProbabilityModel) for m in component_models])
-        assert output_combination_rule in [cr_max, cr_plus]
+        assert output_combination_rule in [cr_min, cr_max, cr_plus]
 
 
 
         self.anomaly_threshold = anomaly_threshold
-        self.is_clustering = clustering
+        self.is_clustering = False #clustering not used in the python wrapper since it does not seem to work in the C++ code.
+        self.output_combination_rule = output_combination_rule
 
         #//AnomalyDetector(int n, int off, int splt, double th, int cl); // Sublasses must know the numbers and types of micromodels
 
@@ -161,7 +249,7 @@ class BaseISC:
         splt = -1
 
         th = anomaly_threshold
-        cl = 1 if clustering else 0
+        cl = 1 if self.is_clustering else 0
 
         if isinstance(component_models, P_ProbabilityModel):
             n = 1
@@ -169,15 +257,18 @@ class BaseISC:
         else:
             n = len(component_models)
 
+        self.component_models = component_models
 
         # Map argument to C++ argument
-        comp_distributions = _IscMicroModelCreator(n)
+        comp_distributions = _IscMicroModelVector()
 
         for i in range(n):
-            comp_distributions.add(i,component_models[i].create_micromodel())
+            comp_distributions.push_back(self.component_models[i].create_micromodel())
 
+        self.classes_ = None
         self.num_of_partitions = n
         self._anomaly_detector = _AnomalyDetector(off, splt, th, cl, output_combination_rule, comp_distributions);
+
 
     def fit(self, X, y=None):
         '''
@@ -188,32 +279,41 @@ class BaseISC:
         :return:
         '''
 
-        if isinstance(X, pyisc._DataObject):
-            assert not isinstance(y, list) and not isinstance(y, ndarray)
-            self.class_column = y
-            self._anomaly_detector._SetParams(0,-1 if self.class_column is None else self.class_column ,self.anomaly_threshold,1 if self.is_clustering else 0)
+        return self._fit(X,y)
+
+    def _fit(self,X,y=None):
+        if isinstance(X, pyisc.DataObject) and y is None:
+            assert y is None # Contained in the data object
+            self.class_column = X.class_column
+            if self.class_column >= 0:
+                self.classes_ = X.classes_
+
+            self._anomaly_detector._SetParams(
+                0,
+                -1 if X.class_column is None else X.class_column,
+                self.anomaly_threshold,
+                1 if self.is_clustering else 0
+            )
             self._anomaly_detector._TrainData(X)
             return self
-        elif isinstance(X, pyisc.DataObject):
-            assert y is None or X.class_column == y
-            return self.fit(X._as_super_class(),X.class_column)
-
         if isinstance(X, ndarray):
             class_column = -1
             data_object = None
+            assert X.ndim <= 2
+            if X.ndim == 2:
+                max_class_column = X.shape[1]
+            else:
+                max_class_column = 1
             if isinstance(y, list) or isinstance(y, ndarray):
                 assert len(X) == len(y)
-                class_column=X.ndim
+                class_column = max_class_column
                 data_object = pyisc.DataObject(numpy.c_[X, y], class_column=class_column)
-            elif y is None or int(y) == y and y > -1:
-                class_column = y
+            elif y is None or int(y) == y and y > -1 and y <= max_class_column:
+                self.class_column = y
                 data_object = pyisc.DataObject(X,class_column=y)
 
-            if class_column > -1:
-                self.classes_ = data_object.classes_
-
             if data_object is not None:
-                return self.fit(data_object, y=class_column)
+                return self._fit(data_object)
 
         raise ValueError("Unknown type of data to fit X, y:", type(X), type(y))
 
@@ -228,27 +328,33 @@ class BaseISC:
         :return: self
         '''
 
-
-        if y is not self.class_column:
-            raise ValueError('y is not equal to the class_column:', y, ' is not ', self.class_column)
-
-        if isinstance(X, pyisc._DataObject):
+        if isinstance(X, pyisc.DataObject) and y is None and X.class_column == self.class_column:
             self._anomaly_detector._TrainDataIncrementally(X)
             return self
-        elif isinstance(X, pyisc.DataObject):
-            return self.fit_incrementally(X._as_super_class(),y)
-        elif isinstance(X, ndarray):
-            data_object = self._convert_to_data_object_in_scoring(X, y)
+        elif isinstance(X, ndarray) or isinstance(X, list):
+            data_object = self._convert_to_data_object_in_scoring(array(X), y)
 
             if data_object is not None:
-                return self.fit_incrementally(data_object,self.class_column)
+                return self.fit_incrementally(data_object)
+
+        raise ValueError("Unknown type of data to fit X, y", type(X), type(y))
+
+    def unfit_incrementally(self, X, y=None):
+        if isinstance(X, pyisc.DataObject) and y is None and X.class_column == self.class_column:
+            self._anomaly_detector._UntrainDataIncrementally(X)
+            return self
+        elif isinstance(X, ndarray) or isinstance(X, list):
+            data_object = self._convert_to_data_object_in_scoring(array(X), y)
+
+            if data_object is not None:
+                return self.unfit_incrementally(data_object)
 
         raise ValueError("Unknown type of data to fit X, y", type(X), type(y))
 
     def _convert_to_data_object_in_scoring(self, X, y):
         data_object = None
         if isinstance(y, list) or isinstance(y, ndarray):
-            assert self.class_column == X.ndim
+            assert X.ndim == 2 and self.class_column == X.shape[1] or X.ndim == 1 and self.class_column == 1
             data_object = pyisc.DataObject(numpy.c_[X, y], class_column=self.class_column,classes=self.classes_)
         else:
             assert self.class_column == y
@@ -257,3 +363,30 @@ class BaseISC:
 
     def reset(self):
         self._anomaly_detector._Reset();
+
+
+    def compute_logp(self, X1):
+        if self.class_column is not None and not isinstance(X1, pyisc._DataObject):
+            if X1.ndim == 2 and self.class_column >= 0 and self.class_column < X1.shape[1]:
+                data_object = self. \
+                    _convert_to_data_object_in_scoring(
+                    X1,
+                    y=self.class_column
+                )
+            else:
+                data_object = self. \
+                    _convert_to_data_object_in_scoring(
+                    X1,
+                    y=array([None] * len(X1))
+                )
+            logps = []
+            clss = list(self.classes_)
+            for clazz in self.classes_:
+                pyisc._DataObject.set_column_values(data_object, self.class_column, [clss.index(clazz)] * len(data_object))
+
+                logps += [self._anomaly_detector._LogProbabilityOfData(data_object, len(X1))]
+
+            return logps
+        else:
+            data_object = pyisc.DataObject(X1) if not isinstance(X1, pyisc._DataObject) else X1
+            return self._anomaly_detector._LogProbabilityOfData(data_object, len(X1))

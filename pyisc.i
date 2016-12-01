@@ -27,13 +27,16 @@
  #include "src/_Format.hh"
  #include "src/_DataObject.hh"
  #include "src/_AnomalyDetector.hh"
-
  %}
  %include <typemaps.i>
  %include "numpy.i"
  %init %{
  import_array();
  %}
+
+
+
+
 
 %inline %{
   /* Create any sort of [size] array */
@@ -44,6 +47,10 @@
 
   int **_int_pointer_array(int size) {
      return (int **) new int*[size];
+  }
+
+  void _free_array_int_pointer(int** array, int length) {
+    delete [] array;
   }
 
   void _set_int_array(int** array2D, int index, int*array1D) {
@@ -71,6 +78,10 @@
   	return (intfloat*) new intfloat[size];
   }
 
+  void _free_array_intfloat(intfloat* array) {
+    delete [] array;
+}
+
    float _get_intfloat_value(intfloat *array1, int index) {
   	return (float) array1[index];
   }
@@ -94,6 +105,10 @@
 	return out_array;
  }
 
+ void _free_array_double(double* array) {
+    delete [] array;
+}
+
    int* _to_cpp_array_int(int* IN_ARRAY1, int DIM1) {
 	int* out_array = new int[DIM1];
 	for(int i=0; i < DIM1; i++) {
@@ -102,6 +117,10 @@
 
 	return out_array;
  }
+
+void _free_array_int(int* array) {
+    delete [] array;
+}
  
    void _to_numpy_array_double(double* inarray, double* ARGOUT_ARRAY1, int DIM1) {
 	for(int i=0; i < DIM1; i++) {
@@ -120,6 +139,20 @@
     return strings[i];
   }
 
+
+  IscMarkovGaussMicroModel** _to_pointer(std::vector<IscMarkovGaussMicroModel*> vec) {
+    IscMarkovGaussMicroModel** new_vec = new IscMarkovGaussMicroModel*[vec.size()];
+    for(int i=0; i < vec.size(); i++) {
+        new_vec[i] = vec[i];
+    }
+    return new_vec;
+  }
+
+  void _free_pointer(IscMarkovGaussMicroModel** new_vec) {
+    delete [] new_vec;
+  }
+
+
   %}
 
  %apply (double* IN_ARRAY1, int DIM1) {(double* in_array1D, int num_of_columns)}
@@ -132,14 +165,17 @@
 
   /* Parse the header file to generate wrappers */
 
- enum IscCombinationRule {IscMax, IscPlus};
+ enum IscCombinationRule {IscMin, IscMax, IscPlus};
 
 
  %ignore IscCombinationRule;
+  %ignore IscMin;
  %ignore IscMax;
  %ignore IscPlus;
 
  %rename ("_%s", regexmatch$name="^Isc") "";
+
+ %include "std_vector.i"
 
  %include "src/_Format.hh"
  %include "src/_DataObject.hh"
@@ -151,13 +187,20 @@
  %include "isc2/isc_micromodel_markovgaussian.hh"
  #%include "isc2/isc_micromodel_multidirichlet.hh"
 
+#%template(_IscMicroModelCreator) pyisc::_IscMicroModelCreatorTemplate<IscMicroModel>;
+#%template(_IscMarkovGaussMicroModelCreator) pyisc::_IscMicroModelCreatorTemplate<IscMarkovGaussMicroModel>;
+
+%template(_IscMicroModelVector) std::vector<IscMicroModel*>;
+%template(_IscMarkovGaussMicroModelVector) std::vector<IscMarkovGaussMicroModel*>;
 
 
  %pythoncode %{
 from _pyisc_modules.BaseISC import *
 from _pyisc_modules.AnomalyDetector import *
-from _pyisc_modules.DataObject import DataObject
+from _pyisc_modules.DataObject import *
 from _pyisc_modules.SklearnClassifier import *
+from _pyisc_modules.SklearnClusterer import *
+from _pyisc_modules.SklearnOutlierDetector import *
 from numpy import array, dtype, double
 
 

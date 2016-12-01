@@ -52,11 +52,21 @@ dataframe_src_dir = os.path.join(disc_dir,'dataformat')
 isc_src_dir = os.path.join(disc_dir, 'isc2')
 pyisc_src_dir = "src"
 pyisc_module_dir = "_pyisc_modules"
-isclibraries = []
+isclibraries = ["-Wall", "-O"]
 
 numpyincdir = get_numpy_include_dirs()
 
-py_modules = [os.path.join(pyisc_module_dir, src) for src in ["__init__","BaseISC", "AnomalyDetector","DataObject", "SklearnClassifier"]]+["pyisc"]
+py_modules = [
+                 os.path.join(pyisc_module_dir, src) for src in
+                 ["__init__",
+                  "BaseISC",
+                  "AnomalyDetector",
+                  "DataObject",
+                  "SklearnOutlierDetector",
+                  "SklearnClassifier",
+                  "SklearnClusterer"]
+                 ]\
+             +["pyisc"]
 
 
 pylib = get_python_lib()
