@@ -20,7 +20,7 @@ The Python Wrapper of all ISC anomaly scoring methods.
 # along with this code.  If not, see <http://www.gnu.org/licenses/>.
 # --------------------------------------------------------------------------
 
-from numpy import ndarray, array, log, inf
+from numpy import ndarray, array
 
 from pyisc import BaseISC
 

@@ -22,7 +22,7 @@ classifiers (http://scikit-learn.org)
 # --------------------------------------------------------------------------
 
 from pyisc import SklearnClassifier, AnomalyDetector, DataObject
-from numpy import  array, mod, unique, sqrt, inf, mean,std, c_, argmin
+from numpy import  array, mod, unique, sqrt, inf, mean,std, c_, argmin, percentile
 from sklearn.utils import shuffle
 
 class SklearnClusterer:
@@ -62,8 +62,11 @@ class SklearnClusterer:
         if verbose:
             print "Clusters", 1, "Score", score[score < inf].std(), sum(score == inf)
 
+        min_percentile = percentile(score,20)
+        max_percentile = percentile(score,80)
+
         for k in range(start_k,max_k+1):
-            clusters = self._train_clf(ad, X, k,verbose=verbose)
+            clusters = self._train_clf(ad, X, k,verbose=verbose, marked_as_single_cluster=[s >= min_percentile and s <= max_percentile for s in score])
 
             score = ad.anomaly_score(X, clusters)
             scores += [list(score)]
@@ -74,13 +77,14 @@ class SklearnClusterer:
 
         return self.scores
 
-    def _train_clf(self, ad, X, k=None, default_labels=None,verbose=False):
+    def _train_clf(self, ad, X, k=None, default_labels=None,verbose=False, marked_as_single_cluster=[]):
         '''
 
         :param ad: anomaly detector that shall be trained
         :param X: a DataObject
         :param k: the number of clusters
         :param default_labels: the clustering is started with the provided clusters/labels, where k is ignored.
+        :param marked_as_single_cluster: list of booleans marking if data points should be given the same cluster at initialization
         :return:
         '''
         cluster_labels = default_labels
@@ -93,6 +97,9 @@ class SklearnClusterer:
         while True:
             if cluster_labels is None: # Restart the clustering
                 cluster_labels = array(shuffle(mod(array(range(len(X))), k)))
+                if len(marked_as_single_cluster) > 0:
+                    cluster_labels[array(marked_as_single_cluster)] = -1
+
                 last_movements = [-1 for _ in range(num_of_last_movements)]
                 num_of_iterations = 0
                 if verbose:
@@ -111,7 +118,7 @@ class SklearnClusterer:
                 last_movements = last_movements[1:]+[movements]
 
             if count_equal_movements >= 20 or num_of_iterations > self.max_num_of_iterations: # Restart the clustering if the number of movements in last_movements are greater or more equal than 20
-                cluster_labels = None
+                cluster_labels = None # Restart clustering
                 continue
 
             if verbose:
@@ -126,7 +133,7 @@ class SklearnClusterer:
 
         return cluster_labels
 
-    def fit_anomaly_detector(self, X, max_k=2, n_repeat=10, scores=None, use_k=None, init_clusters=None, verbose=False):
+    def fit_anomaly_detector(self, X, max_k=2, n_repeat=10, scores=None, use_k=None, init_clusters=None, verbose=False, scoring_method=mean):
         '''
         The method uses a variation of the elbow curve to select the number of clusters based on the maximum individual
         anomaly score for each cluster computed by the make_scores method.
@@ -137,6 +144,7 @@ class SklearnClusterer:
         :param use_k: if set, no autmatic selection is made, instead the value of use_k is used as number of clusters
         :param init_clusters: the clustering is initialized with the provided clusters. scores, use_k and n_repeat are ignored.
         :param verbose: print progress info
+        :param scoring_method: the method to compute the aggregated evaluation score from teh anomaly scores of the data clustering, e.g. numpy mean or std.
         :return: the anomaly detector with parameters provided in the constructor fitted to the data with the best number of clusters tested
         '''
 
@@ -147,9 +155,9 @@ class SklearnClusterer:
                 if scores is None:
                     for n in xrange(n_repeat):
                         self.make_scores(X, max_k,verbose=verbose)
-                        ss.append(map(lambda s: std(s[s<inf]), self.scores))
+                        ss.append(map(lambda s: scoring_method(s[s<inf]), self.scores))
                 else:
-                    ss = [map(lambda s: std(s[s<inf]), scores[i]) for i in range(len(scores))]
+                    ss = [map(lambda s: scoring_method(s[s<inf]), scores[i]) for i in range(len(scores))]
 
                 best_k, y = self.compute_best_elbow_k(ss)
             else:
@@ -159,17 +167,19 @@ class SklearnClusterer:
         scores = []
         for i in range(n_repeat):
             ad = AnomalyDetector(*self.ad_parms0, **self.ad_parms1)
-            self.clustering_ = self._train_clf(ad, X, best_k,init_clusters)
+            self.clustering_ = self._train_clf(ad, X, best_k,init_clusters,verbose=verbose)
             ad_scores = ad.anomaly_score(X, self.clustering_)
             scores.append(ad_scores[ad_scores < inf].std())
             ad_list.append(ad)
+            if init_clusters is not None:
+                break
 
         best_ad = ad_list[argmin(scores)]
 
         if verbose:
             print "best k", best_k
 
-        if use_k:
+        if use_k or init_clusters is not None or y is not None:
             self.cluster_curve_ = None
         else:
             self.cluster_curve_ = y

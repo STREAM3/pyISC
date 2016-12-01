@@ -27,15 +27,16 @@ class test_SklearnOutlierDetection(unittest.TestCase):
 
         outlier_detector.fit(X)
 
-        self.assertLess(outlier_detector.threshold_, -5.0)
-        self.assertGreater(outlier_detector.threshold_, -6.0)
+
+        self.assertLess(outlier_detector.threshold_, 0.35)
+        self.assertGreater(outlier_detector.threshold_, 0.25)
 
         predictions = outlier_detector.predict(X)
 
         accuracy =  sum(truth == predictions)/float(n_samples)
 
         print "accuracy", accuracy
-        self.assertGreater(accuracy, 0.80)
+        self.assertGreater(accuracy, 0.85)
 
 
 

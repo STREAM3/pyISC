@@ -21,7 +21,7 @@ class TestPConditionalGaussian(TestCase):
                 fit(x). \
                 anomaly_score(x)
 
-        assert_allclose(gauss_scores, condgauss_scores,atol=0.01)
+        assert_allclose(gauss_scores, condgauss_scores,atol=0.01,rtol=0.01)
 
 
         X = array([[x0, x1] for x0,x1 in zip(norm(0, 1).rvs(1000), norm(0, 1).rvs(1000)) ])
@@ -62,71 +62,73 @@ class TestPConditionalGaussian(TestCase):
         assert_allclose(gauss_scores_X, condgauss_scores_X, atol=2)  # Very bad
 
 
-    X = array(
-        [[x0, x0 + 0.1 * x1, x2] for x0, x1, x2 in c_[norm(0, 1).rvs(1000), norm(0, 1).rvs(1000), norm(0, 1).rvs(1000)]])
+        X = array(
+            [[x0, x0 + 0.1 * x1, x2] for x0, x1, x2 in c_[norm(0, 1).rvs(1000), norm(0, 1).rvs(1000), norm(0, 1).rvs(1000)]])
 
-    # This is not equal at all
-    gauss_scores_X = AnomalyDetector(P_Gaussian([0, 1,2])).fit(X).anomaly_score(X)
-    condgauss_scores_X = \
+        # This is not equal at all
+        gauss_scores_X = AnomalyDetector(P_Gaussian([0, 1,2])).fit(X).anomaly_score(X)
+        condgauss_scores_X = \
+            AnomalyDetector(
+                P_ConditionalGaussianCombiner([
+                    P_ConditionalGaussian([0], [1,2]),
+                    P_ConditionalGaussian([1], [2]),
+                    P_ConditionalGaussian([2], []),
+                ])). \
+                fit(X). \
+                anomaly_score(X)
+
+        assert_equal((pearsonr(gauss_scores_X, condgauss_scores_X) > 0.98), True)
+        assert_allclose(gauss_scores_X, condgauss_scores_X, atol=5)  # Very bad
+
+
+        # This is very much equal
+        gauss_scores_X = AnomalyDetector(P_ConditionalGaussian([0, 1, 2], [])).fit(X).anomaly_score(X)
+        condgauss_scores_X = \
+            AnomalyDetector(
+                P_ConditionalGaussianCombiner([
+                    P_ConditionalGaussian([0], [1, 2]),
+                    P_ConditionalGaussian([1], [2]),
+                    P_ConditionalGaussian([2], []),
+                ])). \
+                fit(X). \
+                anomaly_score(X)
+
+        assert_allclose(gauss_scores_X, condgauss_scores_X, atol=0.001)
+
+
+        # If we combine them using a ordinary combination rule by adding anomaly score together
+        condgauss_scores_X2 = \
         AnomalyDetector(
-            P_ConditionalGaussianCombiner([
-                P_ConditionalGaussian([0], [1,2]),
-                P_ConditionalGaussian([1], [2]),
-                P_ConditionalGaussian([2], []),
-            ])). \
-            fit(X). \
-            anomaly_score(X)
-
-    assert_equal((pearsonr(gauss_scores_X, condgauss_scores_X) > 0.98), True)
-    assert_allclose(gauss_scores_X, condgauss_scores_X, atol=5)  # Very bad
-
-
-    # This is very much equal
-    gauss_scores_X = AnomalyDetector(P_ConditionalGaussian([0, 1, 2], [])).fit(X).anomaly_score(X)
-    condgauss_scores_X = \
-        AnomalyDetector(
-            P_ConditionalGaussianCombiner([
+            [
                 P_ConditionalGaussian([0], [1, 2]),
                 P_ConditionalGaussian([1], [2]),
                 P_ConditionalGaussian([2], []),
-            ])). \
+            ], cr_plus). \
             fit(X). \
             anomaly_score(X)
 
-    assert_allclose(gauss_scores_X, condgauss_scores_X, atol=0.001)
+
+        assert_equal((pearsonr(condgauss_scores_X, condgauss_scores_X2) > 0.99), True) # Good
+
+        assert_allclose(condgauss_scores_X2, condgauss_scores_X, atol=2) # Bad
 
 
-    # If we combine them using a ordinary combination rule by adding anomaly score together
-    condgauss_scores_X2 = \
-    AnomalyDetector(
-        [
-            P_ConditionalGaussian([0], [1, 2]),
-            P_ConditionalGaussian([1], [2]),
-            P_ConditionalGaussian([2], []),
-        ], cr_plus). \
-        fit(X). \
-        anomaly_score(X)
+        #
+        ad1 = AnomalyDetector(
+            [P_Gaussian([i]) for i in range(len(X[0]))],
+            cr_plus
+        ).fit(X)
+        s1 = ad1.anomaly_score(X)
 
+        ad2 = AnomalyDetector(
+            [P_ConditionalGaussian([i], []) for i in range(len(X[0]))],
+            cr_plus
+        ).fit(X)
+        s2 = ad2.anomaly_score(X)
 
-    assert_equal((pearsonr(condgauss_scores_X, condgauss_scores_X2) > 0.99), True) # Good
+        print "r:", pearsonr(s1,s2)
 
-    assert_allclose(condgauss_scores_X2, condgauss_scores_X, atol=2) # Bad
-
-
-    #
-    ad1 = AnomalyDetector(
-        [P_Gaussian([i]) for i in range(len(X))],
-        cr_plus
-    ).fit(X)
-    s1 = ad1.anomaly_score(X)
-
-    ad2 = AnomalyDetector(
-        [P_ConditionalGaussian([i], []) for i in range(len(X))],
-        cr_plus
-    ).fit(X)
-    s2 = ad2.anomaly_score(X)
-
-    assert_allclose(s1, s2, rtol=0.01)  # OK
+        assert_allclose(s1, s2, rtol=0.01)  # OK
 
 if __name__ == '__main__':
     unittest.main()

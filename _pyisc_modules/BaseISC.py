@@ -36,6 +36,7 @@ import pyisc
 
 __author__ = 'tol'
 
+cr_min = pyisc.IscMin
 cr_max = pyisc.IscMax
 cr_plus= pyisc.IscPlus
 
@@ -222,7 +223,7 @@ class BaseISC(object):
         assert isinstance(component_models, P_ProbabilityModel) or \
                isinstance(component_models, list) and len(component_models) > 0 and \
                all([isinstance(m, P_ProbabilityModel) for m in component_models])
-        assert output_combination_rule in [cr_max, cr_plus]
+        assert output_combination_rule in [cr_min, cr_max, cr_plus]
 
 
 
@@ -278,6 +279,9 @@ class BaseISC(object):
         :return:
         '''
 
+        return self._fit(X,y)
+
+    def _fit(self,X,y=None):
         if isinstance(X, pyisc.DataObject) and y is None:
             assert y is None # Contained in the data object
             self.class_column = X.class_column
@@ -309,7 +313,7 @@ class BaseISC(object):
                 data_object = pyisc.DataObject(X,class_column=y)
 
             if data_object is not None:
-                return self.fit(data_object)
+                return self._fit(data_object)
 
         raise ValueError("Unknown type of data to fit X, y:", type(X), type(y))
 
@@ -376,8 +380,9 @@ class BaseISC(object):
                     y=array([None] * len(X1))
                 )
             logps = []
+            clss = list(self.classes_)
             for clazz in self.classes_:
-                pyisc._DataObject.set_column_values(data_object, self.class_column, [clazz] * len(data_object))
+                pyisc._DataObject.set_column_values(data_object, self.class_column, [clss.index(clazz)] * len(data_object))
 
                 logps += [self._anomaly_detector._LogProbabilityOfData(data_object, len(X1))]
 

@@ -165,10 +165,11 @@ void _free_array_int(int* array) {
 
   /* Parse the header file to generate wrappers */
 
- enum IscCombinationRule {IscMax, IscPlus};
+ enum IscCombinationRule {IscMin, IscMax, IscPlus};
 
 
  %ignore IscCombinationRule;
+  %ignore IscMin;
  %ignore IscMax;
  %ignore IscPlus;
 

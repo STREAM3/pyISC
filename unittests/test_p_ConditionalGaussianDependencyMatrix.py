@@ -111,28 +111,5 @@ class TestPConditionalGaussianDependencyMatrix(TestCase):
         assert_close(all_acc['single conditional gaussian with combiner'], all_acc['dependency matrix'],decimal=2)
 
 
-        # Test clustering
-
-        # Add fourth class/cluster
-
-        U = array([sample_markov_chain(length,0.5) for _ in range(n_samples)])
-
-        data = r_[data, U]
-        labels = r_[labels, ['U']*len(U)]
-
-        clusterer = SklearnClusterer(P_ConditionalGaussianDependencyMatrix(range(length),length))
-        clusterer.fit_anomaly_detector(data,10)
-
-        plt.plot(range(1,len(clusterer.cluster_curve_)+1),clusterer.cluster_curve_)
-
-        import sklearn.datasets
-
-        iris = sklearn.datasets.load_iris()
-
-        clusterer_iris = SklearnClusterer(P_Gaussian(range(4)))
-        clusterer_iris.fit_anomaly_detector(iris['data'],30,n_repeat=50,verbose=True)
-
-        plt.plot(range(1,len(clusterer_iris.cluster_curve_)+1),clusterer_iris.cluster_curve_)
-
 if __name__ == '__main__':
     unittest.main()
