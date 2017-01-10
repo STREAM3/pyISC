@@ -22,7 +22,10 @@ classifiers (http://scikit-learn.org)
 # --------------------------------------------------------------------------
 
 import pyisc
-from numpy import percentile, abs, inf
+from numpy import percentile, abs, c_, array
+
+from pyisc import DataObject
+
 
 class SklearnOutlierDetector(pyisc.AnomalyDetector):
     threshold_ = None
@@ -40,44 +43,46 @@ class SklearnOutlierDetector(pyisc.AnomalyDetector):
         self.contamination = contamination
         super(pyisc.AnomalyDetector,self).__init__(*anomaly_detector_params0, **anomaly_detector_params1)
 
-    def fit(self,X):
-        old_threshold = None
+    def fit(self, X, y=None):
+
+    def decision_function(self,X,y        old_threshold = None
         threshold = None
         self.threshold_ = 0.0
 
-        self._fit(X)
+        self._fit(X,y)
 
         count = 0
         while count < 100 and (old_threshold is None or abs(threshold - old_threshold) > 0.01):
             old_threshold = threshold
-            ss = self.decision_function(X)
+            ss = self.decision_function(X,y)
             threshold = percentile(ss, 100 * self.contamination)
 
-            self._fit(X[ss > threshold])
+            #print threshold, sum(ss > threshold)
+            self._fit(X[ss > threshold],y[ss > threshold] if y is not None else None)
 
             count += 1
 
         self.threshold_ = threshold
 
         return self
-
-    def decision_function(self,X):
+=None):
         '''
         Returns a measure of anomaly (the log probability of the data) from smallest (most anomalous) to high (least anomalous).
         :param X: an numpy array
-        :param y: an numpy array
+        :param y: an numpy array or None
         :return: numpy array
         '''
-        ss = (1.0/(self.anomaly_score(X)+1e-10) - self.threshold_)
+
+        ss = (1.0/(self.anomaly_score(X,y)+1e-10) - self.threshold_)
 
         return ss
 
-    def predict(self, X):
+    def predict(self, X,y=None):
         '''
         Returns an numpy array with 1 if a row is not anomlaous and -1 if anomalous
         :param X: an numpy array
-        :param y: an numpy array
+        :param y: an numpy array or None (default)
         :param decision_threshold: float value for deciding whether a point is anomalous
         :return: numpy array
         '''
-        return 2 * (self.decision_function(X) > 0) - 1
+        return 2 * (self.decision_function(X,y) > 0) - 1
