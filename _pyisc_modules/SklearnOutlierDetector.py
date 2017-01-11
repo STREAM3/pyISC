@@ -44,8 +44,7 @@ class SklearnOutlierDetector(pyisc.AnomalyDetector):
         super(pyisc.AnomalyDetector,self).__init__(*anomaly_detector_params0, **anomaly_detector_params1)
 
     def fit(self, X, y=None):
-
-    def decision_function(self,X,y        old_threshold = None
+        old_threshold = None
         threshold = None
         self.threshold_ = 0.0
 
@@ -65,7 +64,8 @@ class SklearnOutlierDetector(pyisc.AnomalyDetector):
         self.threshold_ = threshold
 
         return self
-=None):
+
+    def decision_function(self,X,y=None):
         '''
         Returns a measure of anomaly (the log probability of the data) from smallest (most anomalous) to high (least anomalous).
         :param X: an numpy array
