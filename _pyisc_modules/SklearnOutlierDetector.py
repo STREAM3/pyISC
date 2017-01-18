@@ -56,7 +56,6 @@ class SklearnOutlierDetector(pyisc.AnomalyDetector):
             ss = self.decision_function(X,y)
             threshold = percentile(ss, 100 * self.contamination)
 
-            #print threshold, sum(ss > threshold)
             self._fit(X[ss > threshold],y[ss > threshold] if y is not None else None)
 
             count += 1
