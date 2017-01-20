@@ -28,7 +28,6 @@
 #include <isc_micromodel.hh>
 #include <anomalydetector.hh>
 #include "_DataObject.hh"
-#include <isc_micromodel_markovgaussian.hh>
 #include <vector>
 
 
