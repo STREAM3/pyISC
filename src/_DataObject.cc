@@ -22,7 +22,7 @@ void _DataObject::init(pyisc::Format* format) {
 	isc_data_obj = new ::DataObject(format->get_isc_format());
 	data_format = format;
 
-	if(DEBUG)
+	if(DEBUGISC)
 		printf("Create _DataObject\n");
 }
 
@@ -50,7 +50,7 @@ _DataObject::_DataObject(::DataObject* data_object) {
 }
 
 _DataObject::~_DataObject() {
-	if(DEBUG) {
+	if(DEBUGISC) {
 		printf("Delete object");
 	}
 	if (is_data_obj_created && isc_data_obj) {
