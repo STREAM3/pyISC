@@ -26,8 +26,8 @@
 #include <format.hh>
 #include <formattypes.hh>
 
-#ifndef DEBUG
-#define DEBUG 0
+#ifndef DEBUGISC
+#define DEBUGISC 0
 #endif
 
 namespace pyisc {

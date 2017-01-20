@@ -52,7 +52,7 @@ _AnomalyDetector::_AnomalyDetector(
 	for(int i=0; i <  component_distribution_creators.size(); i++) {
 		this->component_distribution_creators.push_back(component_distribution_creators[i]->create());
 	}
-	if(DEBUG)
+	if(DEBUGISC)
 		printf("_AnomalyDetector created\n");
 }
 
@@ -161,14 +161,14 @@ int AnomalyDetector::CalcAnomalyDetailsSingle(union intfloat* vec,
 
 
 _AnomalyDetector::~_AnomalyDetector() {
-	if(DEBUG)
+	if(DEBUGISC)
 		printf("_AnomalyDetector deletion started\n");
 
 	for(int i=0; i <  this->component_distribution_creators.size(); i++) {
 		delete this->component_distribution_creators[i];
 	}
 
-	if(DEBUG)
+	if(DEBUGISC)
 		printf("_AnomalyDetector deleted\n");
 }
 

@@ -30,7 +30,7 @@ namespace pyisc {
 Format::Format() {
 	isc_format = new ::Format();
 	is_format_created = 1;
-	if(DEBUG)
+	if(DEBUGISC)
 		printf("Create isc format\n");
 
 }
@@ -42,7 +42,7 @@ Format::Format(::Format *isc_format0) {
 
 Format::~Format() {
 	if(is_format_created && isc_format) {
-		if(DEBUG)
+		if(DEBUGISC)
 			printf("Delete isc format\n");
 		delete isc_format;
 		isc_format=0;
