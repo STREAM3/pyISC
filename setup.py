@@ -63,8 +63,7 @@ py_modules = [
                   "AnomalyDetector",
                   "DataObject",
                   "SklearnOutlierDetector",
-                  "SklearnClassifier",
-                  "SklearnClusterer"]
+                  "SklearnClassifier"]
                  ]\
              +["pyisc"]
 
@@ -112,7 +111,6 @@ dataframe_sources = [os.path.join(dataframe_src_dir, src)
 isc_sources = [os.path.join(isc_src_dir, src)
                for src in "anomalydetector.o isc_mixture.o isc_component.o isc_micromodel_poissongamma.o " \
                           "isc_micromodel_gaussian.o isc_micromodel_multigaussian.o " \
-                          "isc_micromodel_markovgaussian.o " \
                           "hmatrix.o gamma.o hgf.o"
                    .replace(".o", ".cc").split()]
 

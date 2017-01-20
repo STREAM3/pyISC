@@ -27,11 +27,8 @@ from pyisc import _to_cpp_array_int, _AnomalyDetector, \
     _IscMultiGaussianMicroModel, \
     _IscPoissonMicroModel, \
     _IscPoissonMicroModelOneside, \
-    _IscMicroModelVector, _IscGammaMicroModel, \
-    _IscMarkovGaussMicroModel, \
-    _IscMarkovGaussMicroModelVector, \
-    _IscMarkovGaussCombinerMicroModel, \
-    _IscMarkovGaussMatrixMicroModel
+    _IscMicroModelVector, _IscGammaMicroModel \
+
 import pyisc
 
 __author__ = 'tol'
@@ -123,80 +120,6 @@ class P_Gamma(P_ProbabilityModel):
 
     def create_micromodel(self):
         self._saved_model =  _IscGammaMicroModel(self.frequency_column,self.period_column)
-        return self._saved_model
-
-class P_ConditionalGaussian(P_ProbabilityModel):
-
-    def __init__(self, prediction_column, conditional_column):
-        '''
-        Implements a conditional multivariate Gaussian distribution.
-
-        :param prediction_column: an integer or an list of integers
-        :param condition_column: an integer or an list of integers
-        '''
-
-        self.prediction_column = prediction_column
-        self.conditional_column = conditional_column
-
-
-    def create_micromodel(self):
-        pred_index = _to_cpp_array_int(self.prediction_column)
-        cond_index= _to_cpp_array_int(self.conditional_column)
-        self._saved_model = _IscMarkovGaussMicroModel(pred_index, len(self.prediction_column),
-                                         cond_index, len(self.conditional_column))
-
-        pyisc._free_array_int(pred_index)
-        pyisc._free_array_int(cond_index)
-
-        return self._saved_model
-
-class P_ConditionalGaussianCombiner(P_ProbabilityModel):
-
-    def __init__(self, gaussian_components):
-        '''
-        Combines the contributions from conditionally independent multivariate conditional Gaussian distributions, so that
-        a Bayesian belief net or Markov chain can be created. The components must form a directed acyclic graph.
-
-        :param gaussian_components: a single P_ConditionalGauss or a list of P_ConditionalGauss.
-        '''
-
-        assert isinstance(gaussian_components, P_ConditionalGaussian) or \
-               isinstance(gaussian_components,list) and \
-               all([isinstance(comp, P_ConditionalGaussian) for comp in gaussian_components])
-
-        self.gaussian_components = gaussian_components
-
-    def create_micromodel(self):
-        num_of_components = len(self.gaussian_components)
-        creator = _IscMarkovGaussMicroModelVector()
-        for i in range(num_of_components):
-            creator.push_back(self.gaussian_components[i].create_micromodel())
-        ptr_creator = pyisc._to_pointer(creator)
-        self._saved_model = _IscMarkovGaussCombinerMicroModel(ptr_creator, num_of_components)
-        pyisc._free_pointer(ptr_creator)
-        return self._saved_model
-
-class P_ConditionalGaussianDependencyMatrix(P_ProbabilityModel):
-
-    def __init__(self, value_columns, elements_per_row):
-        '''
-        Creates a dependency matrix where each element is only dependent on its right neighbour and the element directly
-        below in all cases where they are present. Otherwise the elements are only dependent on the element of the two
-        neighbours that is present, or no element.
-
-        :param value_columns: the column indexes that are contained in the matrix as a sequence of the elements
-        from left to the right and from the first row to the last row.
-        :param elements_per_row: the number of column indexes (elements) that constitutes a row in the matrix,
-        all rows are equally long.
-        '''
-
-        self.value_columns = value_columns
-        self.slots_per_row = elements_per_row
-
-    def create_micromodel(self):
-        value_array = _to_cpp_array_int(self.value_columns)
-        self._saved_model = _IscMarkovGaussMatrixMicroModel(value_array, len(self.value_columns), self.slots_per_row)
-        pyisc._free_array_int(value_array)
         return self._saved_model
 
 class BaseISC(object):

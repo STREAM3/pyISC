@@ -21,8 +21,6 @@
  #include "isc2/isc_micromodel_multigaussian.hh"
  #include "isc2/hgf.hh"
  #include "isc2/isc_micromodel_poissongamma.hh"
- #include "isc2/isc_micromodel_markovgaussian.hh"
- //#include "isc2/isc_micromodel_multidirichlet.hh"
  #include "isc2/anomalydetector.hh"
  #include "src/_Format.hh"
  #include "src/_DataObject.hh"
@@ -140,19 +138,6 @@ void _free_array_int(int* array) {
   }
 
 
-  IscMarkovGaussMicroModel** _to_pointer(std::vector<IscMarkovGaussMicroModel*> vec) {
-    IscMarkovGaussMicroModel** new_vec = new IscMarkovGaussMicroModel*[vec.size()];
-    for(int i=0; i < vec.size(); i++) {
-        new_vec[i] = vec[i];
-    }
-    return new_vec;
-  }
-
-  void _free_pointer(IscMarkovGaussMicroModel** new_vec) {
-    delete [] new_vec;
-  }
-
-
   %}
 
  %apply (double* IN_ARRAY1, int DIM1) {(double* in_array1D, int num_of_columns)}
@@ -184,14 +169,9 @@ void _free_array_int(int* array) {
  %include "isc2/isc_micromodel.hh"
  %include "isc2/isc_micromodel_multigaussian.hh"
  %include "isc2/isc_micromodel_poissongamma.hh"
- %include "isc2/isc_micromodel_markovgaussian.hh"
- #%include "isc2/isc_micromodel_multidirichlet.hh"
 
-#%template(_IscMicroModelCreator) pyisc::_IscMicroModelCreatorTemplate<IscMicroModel>;
-#%template(_IscMarkovGaussMicroModelCreator) pyisc::_IscMicroModelCreatorTemplate<IscMarkovGaussMicroModel>;
 
 %template(_IscMicroModelVector) std::vector<IscMicroModel*>;
-%template(_IscMarkovGaussMicroModelVector) std::vector<IscMarkovGaussMicroModel*>;
 
 
  %pythoncode %{
@@ -199,7 +179,6 @@ from _pyisc_modules.BaseISC import *
 from _pyisc_modules.AnomalyDetector import *
 from _pyisc_modules.DataObject import *
 from _pyisc_modules.SklearnClassifier import *
-from _pyisc_modules.SklearnClusterer import *
 from _pyisc_modules.SklearnOutlierDetector import *
 from numpy import array, dtype, double
 
