@@ -2,7 +2,7 @@
 The Python Wrapper of all ISC anomaly scoring methods.
 """
 # --------------------------------------------------------------------------
-# Copyright (C) 2014, 2015, 2016 SICS Swedish ICT AB
+# Copyright (C) 2014, 2015, 2016, 2017 SICS Swedish ICT AB
 #
 # Main author: Tomas Olsson <tol@sics.se>
 #

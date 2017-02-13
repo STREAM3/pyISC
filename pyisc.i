@@ -199,8 +199,9 @@ from _pyisc_modules.BaseISC import *
 from _pyisc_modules.AnomalyDetector import *
 from _pyisc_modules.DataObject import *
 from _pyisc_modules.SklearnClassifier import *
-from _pyisc_modules.SklearnClusterer import *
 from _pyisc_modules.SklearnOutlierDetector import *
+from _pyisc_modules.AnomalyClustering import *
+from _pyisc_modules.OutlierClustering import *
 from numpy import array, dtype, double
 
 

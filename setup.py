@@ -64,7 +64,9 @@ py_modules = [
                   "DataObject",
                   "SklearnOutlierDetector",
                   "SklearnClassifier",
-                  "SklearnClusterer"]
+                  "AnomalyClustering",
+                  "OutlierClustering",
+                  ]
                  ]\
              +["pyisc"]
 
