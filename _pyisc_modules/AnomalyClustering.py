@@ -46,13 +46,13 @@ class AnomalyClustering(AnomalyDetector):
             od = self._create_detector(*self.ad_parms0, **self.ad_parms1)
             labels = self._train_clf(od, X, self.n_clusters,verbose=verbose)
 
-            inv_scores = np.exp(-od.anomaly_score(X, labels))
-
-            ss += [sum(1.0 - inv_scores)]
+            ss += [od.loglikelihood(X,labels)]
 
             labels_list += [labels]
 
-        self._detector_fit(X, np.array(labels_list[np.argmin(ss)]))
+        #print ss, labels
+
+        self._detector_fit(X, np.array(labels_list[np.argmax(ss)]))
 
         self.clf_ = SklearnClassifier.clf(self)
 
@@ -72,7 +72,7 @@ class AnomalyClustering(AnomalyDetector):
         cluster_labels = default_labels
 
         count_equal_movements = 0
-        num_of_last_movements = 5  # the last 5 number of moments are stored stored
+        num_of_last_movements = 5  # the last 5 number of moments are stored
         last_movements = [-1 for _ in range(num_of_last_movements)]
         num_of_iterations = 0
 
@@ -118,3 +118,5 @@ class AnomalyClustering(AnomalyDetector):
     def anomaly_score(self, X,y=None):
         return AnomalyDetector.anomaly_score(self, X, self.clf_.predict(X) if self.clf_ is not None and y is None else y)
 
+    def loglikelihood(self,X,y=None):
+        return AnomalyDetector.loglikelihood(self, X, self.clf_.predict(X) if self.clf_ is not None and y is None else y)

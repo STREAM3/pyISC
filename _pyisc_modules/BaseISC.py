@@ -22,7 +22,7 @@ The Python Wrapper of all ISC anomaly detector training methods.
 from _pyisc import _to_cpp_array
 from abc import abstractmethod
 import numpy
-from numpy import ndarray, array
+from numpy import ndarray, array, c_
 from pyisc import _to_cpp_array_int, _AnomalyDetector, \
     _IscMultiGaussianMicroModel, \
     _IscPoissonMicroModel, \
@@ -390,3 +390,12 @@ class BaseISC(object):
         else:
             data_object = pyisc.DataObject(X1) if not isinstance(X1, pyisc._DataObject) else X1
             return self._anomaly_detector._LogProbabilityOfData(data_object, len(X1))
+
+
+    def loglikelihood(self,X,y=None):
+        assert isinstance(X, ndarray) and (self.class_column is None and y is None or len(y) == len(X))
+
+        if y is not None:
+            return self._anomaly_detector._LogProbabilityOfData(pyisc.DataObject(c_[X,y], class_column=len(X[0])), len(X)).sum()
+        else:
+            return self._anomaly_detector._LogProbabilityOfData(pyisc.DataObject(X), len(X)).sum()

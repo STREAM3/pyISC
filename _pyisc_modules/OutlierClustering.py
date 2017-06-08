@@ -45,3 +45,6 @@ class OutlierClustering(AnomalyClustering,SklearnOutlierDetector):
 
     def anomaly_score(self, X, y=None):
         return SklearnOutlierDetector.anomaly_score(self, X, self.clf_.predict(X) if self.clf_ is not None and y is None else y)
+
+    def loglikelihood(self,X,y=None):
+        return AnomalyClustering.loglikelihood(self, X, self.clf_.predict(X) if self.clf_ is not None and y is None else y)
