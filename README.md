@@ -73,3 +73,8 @@ Then:
 `>> jupyter notebook pyISC_tutorial.ipynb`
 
 If not opened automatically, click on `pyISC_tutorial.ipynb` in the web page that was opened in a web browser.
+
+### How to Cite 
+
+Emruli, B., Olsson, T., & Holst, A. (2017).  pyISC: A Bayesian Anomaly Detection Framework for Python. In Florida Artificial Intelligence Research Society Conference. Retrieved from https://aaai.org/ocs/index.php/FLAIRS/FLAIRS17/paper/view/15527
+
