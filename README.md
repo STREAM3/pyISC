@@ -6,11 +6,11 @@ The Python API to the ISC anomaly detection and classification framework. The fr
 
 Questions regarding the use of the framework: https://groups.google.com/forum/#!forum/pyisc-users
 
-##Prerequisite:
+## Prerequisite:
 
 Notice, pyISC/visISC has only been tested using 64 bit Python.
 
-###Install Python distribution 
+### Install Python distribution 
 
 Install Python 2.7
 
@@ -35,13 +35,13 @@ If you intend to also install visISC, you have to downgrade the numpy installati
 
 Windows:
 
-`>> conda install mingw libpython`
+`>> conda install mingw libpython==1.0`
 
 OS X:
 
 Install the Xcode developer tools from App Store.
 
-###Install Swig
+### Install Swig
 
 (search for suitable version with `>> anaconda search -t conda swig`)
 
