@@ -25,7 +25,7 @@ from _pyisc import _AnomalyDetector__ClassifyData
 from numpy import array, ndarray
 from numpy.ma.core import exp
 from numpy.ma.extras import unique
-from scipy.misc.common import logsumexp
+from scipy.misc import logsumexp
 
 from sklearn.base import ClassifierMixin, BaseEstimator
 from pyisc import P_Gaussian, BaseISC, cr_max, _AnomalyDetector
