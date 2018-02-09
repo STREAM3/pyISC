@@ -56,6 +56,38 @@ _AnomalyDetector::_AnomalyDetector(
 		printf("_AnomalyDetector created\n");
 }
 
+
+void _AnomalyDetector::exportModel(AbstractModelExporter exporter) {
+	exporter.addParameter("off", off);
+	exporter.addParameter("splt", splt);
+	exporter.addParameter("th", th);
+	exporter.addParameter("cl", cl);
+	exporter.addParameter("cr", cr);
+	exporter.addParameter("components_length", component_distribution_creators.size());
+	for(int i=0; i <  component_distribution_creators.size(); i++) {
+		AbstractModelExporter compExporter = exporter.createModelExporter(new char[]{(char)i})
+		this->component_distribution_creators[i]->exportModel(compExporter);
+	}
+
+	if(DEBUG)
+		printf("_AnomalyDetector exported\n");
+
+
+}
+
+_AnomalyDetector::~_AnomalyDetector() {
+	if(DEBUG)
+		printf("_AnomalyDetector deletion started\n");
+
+	for(int i=0; i <  this->component_distribution_creators.size(); i++) {
+		delete this->component_distribution_creators[i];
+	}
+
+	if(DEBUG)
+		printf("_AnomalyDetector deleted\n");
+}
+
+
 void _AnomalyDetector::_SetParams(int off, int splt, double th, int cl) {
 	::AnomalyDetector::SetParams(off,splt,th,cl);
 }
@@ -160,17 +192,6 @@ int AnomalyDetector::CalcAnomalyDetailsSingle(union intfloat* vec,
 
 
 
-_AnomalyDetector::~_AnomalyDetector() {
-	if(DEBUG)
-		printf("_AnomalyDetector deletion started\n");
-
-	for(int i=0; i <  this->component_distribution_creators.size(); i++) {
-		delete this->component_distribution_creators[i];
-	}
-
-	if(DEBUG)
-		printf("_AnomalyDetector deleted\n");
-}
 
 
 void _AnomalyDetector::_CalcAnomalyDetailPerformanceTest(pyisc::_DataObject* d) {

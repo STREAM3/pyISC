@@ -119,7 +119,7 @@ isc_sources = [os.path.join(isc_src_dir, src)
                    .replace(".o", ".cc").split()]
 
 pyisc_sources = [os.path.join(pyisc_src_dir, src) for src in ["_Format.cc", "_DataObject.cc", "_AnomalyDetector.cc"]]
-pyisc_headers = [s.replace(".cc", ".hh") for s in pyisc_sources]
+pyisc_headers = [s.replace(".cc", ".hh") for s in pyisc_sources] +["isc_exporter.hh"]
 
 # Only run when creating the distribution, not when installing it on someone else computer. Removes dependency on Swig
 if os.path.exists('pyisc.i'):

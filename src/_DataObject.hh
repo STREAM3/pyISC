@@ -49,7 +49,7 @@ public:
 	virtual ~_DataObject();
 
 	/**
-	 * Read isc original data objet from file
+	 * Read isc original data object from file
 	 */
 	_DataObject(const char* formatfile, const char* datafile = 0);
 
