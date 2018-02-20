@@ -4,3 +4,6 @@
 [submodule "ArduinoJson"]
 	path = ArduinoJson
 	url = https://github.com/bblanchon/ArduinoJson.git
+[submodule "isc2"]
+	path = isc2
+	url = https://github.com/sics-dna/isc2
