@@ -1,6 +1,7 @@
 import os
 import sys
-from distutils.core import setup, Extension
+#from skbuild import setup
+from distutils.core import setup,Extension
 
 from numpy.distutils.misc_util import get_numpy_include_dirs
 from distutils.sysconfig import get_python_lib;
@@ -48,6 +49,7 @@ extra_flags = []
 
 disc_dir = "."
 
+arduinojson_dir = os.path.join("ArduinoJson","src")
 dataframe_src_dir = os.path.join(disc_dir,'dataformat')
 isc_src_dir = os.path.join(disc_dir, 'isc2')
 pyisc_src_dir = "src"
@@ -105,6 +107,7 @@ else: # Default, works for Linux
     isclibraries += ["z"]
     extra_flags = ["-Wmissing-declarations","-DUSE_WCHAR -DPLATFORM_GTK"]
 
+#extra_flags += ['-std=c++11']
 
 dataframe_sources = [os.path.join(dataframe_src_dir, src)
                      for src in "readtokens.o table.o format.o formatdispatch.o formatbinary.o " \
@@ -118,20 +121,21 @@ isc_sources = [os.path.join(isc_src_dir, src)
                           "hmatrix.o gamma.o hgf.o"
                    .replace(".o", ".cc").split()]
 
-pyisc_sources = [os.path.join(pyisc_src_dir, src) for src in ["_Format.cc", "_DataObject.cc", "_AnomalyDetector.cc"]]
-pyisc_headers = [s.replace(".cc", ".hh") for s in pyisc_sources] +["isc_exporter.hh"]
+pyisc_sources = [os.path.join(pyisc_src_dir, src) for src in ["_Format.cc", "_DataObject.cc", "_AnomalyDetector.cc", "_JSonExporter.cc", "_JSonImporter.cc"]]
+pyisc_headers = [s.replace(".cc", ".hh") for s in pyisc_sources]
 
 # Only run when creating the distribution, not when installing it on someone else computer. Removes dependency on Swig
 if os.path.exists('pyisc.i'):
     setup(name="pyisc",
           author="Tomas Olsson",
-          author_email="tol@sics.se",
+          author_email="tomas.olsson@ri.se",
           url="http://www.sics.se",
           version="1.0",
           ext_modules=[
               Extension("_pyisc",
-                        sources=dataframe_sources+isc_sources+pyisc_sources+["pyisc.i"],
-                        include_dirs=[disc_dir, isc_src_dir, dataframe_src_dir, pyisc_src_dir]+numpyincdir,
+                        language='c++',
+                        sources=["pyisc.i"]+dataframe_sources+isc_sources+pyisc_sources,
+                        include_dirs=[disc_dir, isc_src_dir, dataframe_src_dir, pyisc_src_dir, arduinojson_dir]+numpyincdir,
                         extra_compile_args=extra_flags,
                         swig_opts=['-c++','-I'+str(disc_dir)])
           ],
@@ -145,13 +149,14 @@ if os.path.exists('pyisc.i'):
 
 setup(name="pyisc",
       author="Tomas Olsson",
-      author_email="tol@sics.se",
+      author_email="tomas.olsson@ri.se",
       url="http://www.sics.se",
       version="1.0",
       ext_modules=[
           Extension("_pyisc",
-                    sources=dataframe_sources+isc_sources+pyisc_sources+["pyisc_wrap.cpp"],
-                    include_dirs=[disc_dir, isc_src_dir,dataframe_src_dir,pyisc_src_dir]+numpyincdir,
+                    language='c++',
+                    sources=["pyisc_wrap.cpp"]+dataframe_sources+isc_sources+pyisc_sources,
+                    include_dirs=[disc_dir, isc_src_dir,dataframe_src_dir,pyisc_src_dir, arduinojson_dir]+numpyincdir,
                     extra_compile_args=extra_flags,
                     swig_opts=['-c++'])
       ],

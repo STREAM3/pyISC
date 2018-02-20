@@ -12,6 +12,7 @@
  #include "dataformat/formatsymbol.hh"
  #include "dataformat/dynindvector.hh"
  #include "dataformat/data.hh"
+ #include "isc2/isc_exportimport.hh"
  #include "isc2/isc_micromodel.hh"
  #include "isc2/hmatrix.hh"
  #include "isc2/isc_micromodel_gaussian.hh"
@@ -27,9 +28,14 @@
  #include "src/_Format.hh"
  #include "src/_DataObject.hh"
  #include "src/_AnomalyDetector.hh"
+ #include "src/_JSonExporter.hh"
+ #include "src/_JSonImporter.hh"
+
  %}
  %include <typemaps.i>
  %include "numpy.i"
+ %include <std_vector.i>
+ %include <std_string.i>
  %init %{
  import_array();
  %}
@@ -175,21 +181,21 @@ void _free_array_int(int* array) {
 
  %rename ("_%s", regexmatch$name="^Isc") "";
 
- %include "std_vector.i"
-
+ %include "isc2/isc_exportimport.hh"
  %include "src/_Format.hh"
  %include "src/_DataObject.hh"
  %include "src/_AnomalyDetector.hh"
+ %include "src/_JSonExporter.hh"
+ %include "src/_JSonImporter.hh"
+
  %include "isc2/isc_component.hh"
  %include "isc2/isc_micromodel.hh"
  %include "isc2/isc_micromodel_multigaussian.hh"
  %include "isc2/isc_micromodel_poissongamma.hh"
  %include "isc2/isc_micromodel_markovgaussian.hh"
+
+
  #%include "isc2/isc_micromodel_multidirichlet.hh"
-
-#%template(_IscMicroModelCreator) pyisc::_IscMicroModelCreatorTemplate<IscMicroModel>;
-#%template(_IscMarkovGaussMicroModelCreator) pyisc::_IscMicroModelCreatorTemplate<IscMarkovGaussMicroModel>;
-
 %template(_IscMicroModelVector) std::vector<IscMicroModel*>;
 %template(_IscMarkovGaussMicroModelVector) std::vector<IscMarkovGaussMicroModel*>;
 

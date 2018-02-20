@@ -41,6 +41,9 @@ OS X:
 
 Install the Xcode developer tools from App Store.
 
+All:
+Install the JSON library for storing/pickle of models at https://github.com/nlohmann/json#integration
+
 ### Install Swig
 
 (search for suitable version with `>> anaconda search -t conda swig`)

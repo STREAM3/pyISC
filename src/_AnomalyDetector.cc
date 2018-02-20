@@ -47,7 +47,8 @@ namespace pyisc {
 _AnomalyDetector::_AnomalyDetector(
 		int off, int splt, double th,
 		int cl, ::IscCombinationRule cr,
-		std::vector<IscMicroModel*> component_distribution_creators) : ::AnomalyDetector(component_distribution_creators.size(),off,splt,th,cl,cr, inner_create_micro_model) {
+		std::vector<IscMicroModel*> component_distribution_creators) :
+				::AnomalyDetector(component_distribution_creators.size(),off,splt,th,cl,cr, inner_create_micro_model) {
 
 	for(int i=0; i <  component_distribution_creators.size(); i++) {
 		this->component_distribution_creators.push_back(component_distribution_creators[i]->create());
@@ -57,16 +58,40 @@ _AnomalyDetector::_AnomalyDetector(
 }
 
 
-void _AnomalyDetector::exportModel(AbstractModelExporter exporter) {
-	exporter.addParameter("off", off);
-	exporter.addParameter("splt", splt);
-	exporter.addParameter("th", th);
-	exporter.addParameter("cl", cl);
-	exporter.addParameter("cr", cr);
-	exporter.addParameter("components_length", component_distribution_creators.size());
+void _AnomalyDetector::importModel(IscAbstractModelImporter *importer) {
+    if(DEBUG)
+        printf("_AnomalyDetector calling importer\n");
+
+	IscAbstractModelImporter *innerImporter = importer->getModelImporter("AnomalyDetector");
+
+	if(DEBUG)
+        printf("_AnomalyDetector importer cannot reach this far \n");
+
+	::AnomalyDetector::importModel(innerImporter);
+
+    delete innerImporter;
+
+
 	for(int i=0; i <  component_distribution_creators.size(); i++) {
-		AbstractModelExporter compExporter = exporter.createModelExporter(new char[]{(char)i})
+		IscAbstractModelImporter *compImporter = importer->getModelImporter(i);
+		this->component_distribution_creators[i]->importModel(compImporter);
+		//delete compImporter;
+	}
+
+	if(DEBUG)
+		printf("_AnomalyDetector imported\n");
+}
+
+
+void _AnomalyDetector::exportModel(IscAbstractModelExporter *exporter) {
+    IscAbstractModelExporter *innerExporter = exporter->createModelExporter("AnomalyDetector");
+	::AnomalyDetector::exportModel(innerExporter);
+    delete innerExporter;
+
+	for(int i=0; i <  component_distribution_creators.size(); i++) {
+		IscAbstractModelExporter *compExporter = exporter->createModelExporter(i);
 		this->component_distribution_creators[i]->exportModel(compExporter);
+		delete compExporter;
 	}
 
 	if(DEBUG)

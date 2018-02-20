@@ -4,3 +4,6 @@
 [submodule "dataformat"]
 	path = dataformat
 	url = https://github.com/sics-dna/dataformat
+[submodule "ArduinoJson"]
+	path = ArduinoJson
+	url = https://github.com/bblanchon/ArduinoJson.git

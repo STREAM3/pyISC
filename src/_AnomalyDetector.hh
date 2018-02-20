@@ -30,7 +30,7 @@
 #include "_DataObject.hh"
 #include <isc_micromodel_markovgaussian.hh>
 #include <vector>
-#include "isc_exporter.hh"
+#include "isc_exportimport.hh"
 
 
 namespace pyisc {
@@ -64,7 +64,8 @@ public:
 	//			::IscCombinationRule cr, ::IscCreateFunc cf); // Or a creation function for the appropriate micromodels can be used
 	virtual ~_AnomalyDetector();
 
-	virtual void _AnomalyDetector::exportModel(AbstractModelExporter exporter);
+	virtual void importModel(IscAbstractModelImporter *importer);
+	virtual void exportModel(IscAbstractModelExporter *exporter);
 	virtual void _SetParams(int off, int splt, double th, int cl);
 	virtual void _Reset();
 	virtual void _TrainOne(Format* format, double* in_array1D, int num_of_columns);

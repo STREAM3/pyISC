@@ -22,7 +22,7 @@ The Python Wrapper of all ISC anomaly scoring methods.
 
 from numpy import ndarray, array
 
-from pyisc import BaseISC
+from pyisc import BaseISC, _JSonExporter
 
 import pyisc
 
