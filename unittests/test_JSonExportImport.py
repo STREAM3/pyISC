@@ -28,9 +28,9 @@ class MyTestCase(unittest.TestCase):
 
         anomaly_detector = pyisc.AnomalyDetector(
             component_models=[
-                pyisc.P_Gaussian(1),  # columns 1 and 0
-                pyisc.P_Gaussian(2),  # columns 2 and 0
-                pyisc.P_Gaussian(3)  # column 3
+                pyisc.P_Gaussian(0),  # columns 1 and 0
+                pyisc.P_Gaussian(1),  # columns 2 and 0
+                pyisc.P_Gaussian(2)  # column 3
             ],
             output_combination_rule=pyisc.cr_max
         )
@@ -39,13 +39,13 @@ class MyTestCase(unittest.TestCase):
 
         json =  anomaly_detector.exportJSon()
 
-        print json
+        #print json
 
         anomaly_detector2 = pyisc.AnomalyDetector(
             component_models=[
-                pyisc.P_Gaussian(1),  # columns 1 and 0
-                pyisc.P_Gaussian(2),  # columns 2 and 0
-                pyisc.P_Gaussian(3)  # column 3
+                pyisc.P_Gaussian(0),  # columns 1 and 0
+                pyisc.P_Gaussian(1),  # columns 2 and 0
+                pyisc.P_Gaussian(2)  # column 3
             ],
             output_combination_rule=pyisc.cr_max
         )
@@ -54,7 +54,7 @@ class MyTestCase(unittest.TestCase):
         
         json2 = anomaly_detector2.exportJSon()
 
-        print json2
+        #print json2
 
         self.assertEqual(json, json2)
 

@@ -50,6 +50,13 @@ class P_ProbabilityModel:
     def create_micromodel(self):
         pass
 
+    @abstractmethod
+    def get_column_index(self):
+        '''
+        :return: list with used column index
+        '''
+        pass
+
 class P_Gaussian(P_ProbabilityModel):
 
     def __init__(self, value_column):
@@ -62,6 +69,9 @@ class P_Gaussian(P_ProbabilityModel):
             self.column_index = value_column
         else:
             self.column_index = [value_column]
+
+    def get_column_index(self):
+        return self.column_index
 
     def create_micromodel(self):
         column_array = _to_cpp_array_int(self.column_index)
@@ -82,6 +92,8 @@ class P_Poisson(P_ProbabilityModel):
         '''
         self.column_index = [frequency_column,period_column]
 
+    def get_column_index(self):
+        return self.column_index
 
     def create_micromodel(self):
         self._saved_model = _IscPoissonMicroModel(self.column_index[0], self.column_index[1])
@@ -101,6 +113,8 @@ class P_PoissonOnesided(P_ProbabilityModel):
         '''
         self.column_index = [frequency_column,period_column]
 
+    def get_column_index(self):
+        return self.column_index
 
     def create_micromodel(self):
         self._saved_model = _IscPoissonMicroModelOneside(self.column_index[0], self.column_index[1])
@@ -121,6 +135,9 @@ class P_Gamma(P_ProbabilityModel):
         self.frequency_column = frequency_column
         self.period_column = period_column
 
+    def get_column_index(self):
+        return [self.frequency_column,self.period_column]
+
     def create_micromodel(self):
         self._saved_model =  _IscGammaMicroModel(self.frequency_column,self.period_column)
         return self._saved_model
@@ -138,6 +155,9 @@ class P_ConditionalGaussian(P_ProbabilityModel):
         self.prediction_column = prediction_column
         self.conditional_column = conditional_column
 
+    def get_column_index(self):
+        return self.prediction_column if isinstance(self.prediction_column, list) else [self.prediction_column] + \
+        self.conditional_column if isinstance(self.prediction_column, list) else [self.conditional_column]
 
     def create_micromodel(self):
         pred_index = _to_cpp_array_int(self.prediction_column)
@@ -166,6 +186,13 @@ class P_ConditionalGaussianCombiner(P_ProbabilityModel):
 
         self.gaussian_components = gaussian_components
 
+    def get_column_index(self):
+        cols = []
+        for comp in self.gaussian_components:
+            cols += comp.get_column_index()
+
+        return cols
+
     def create_micromodel(self):
         num_of_components = len(self.gaussian_components)
         creator = _IscMarkovGaussMicroModelVector()
@@ -192,6 +219,9 @@ class P_ConditionalGaussianDependencyMatrix(P_ProbabilityModel):
 
         self.value_columns = value_columns
         self.slots_per_row = elements_per_row
+
+    def get_column_index(self):
+        return self.value_columns
 
     def create_micromodel(self):
         value_array = _to_cpp_array_int(self.value_columns)
@@ -259,6 +289,9 @@ class BaseISC(object):
 
         self.component_models = component_models
 
+        self._max_index = array([_.get_column_index() for _ in component_models]).flatten().max()
+
+
         # Map argument to C++ argument
         comp_distributions = _IscMicroModelVector()
 
@@ -282,7 +315,11 @@ class BaseISC(object):
         return self._fit(X,y)
 
     def _fit(self,X,y=None):
+
+
         if isinstance(X, pyisc.DataObject) and y is None:
+            assert self._max_index < X.length()  # ensure that data distribution has not to large index into the data
+
             assert y is None # Contained in the data object
             self.class_column = X.class_column
             if self.class_column >= 0:
@@ -297,6 +334,7 @@ class BaseISC(object):
             self._anomaly_detector._TrainData(X)
             return self
         if isinstance(X, ndarray):
+
             class_column = -1
             data_object = None
             assert X.ndim <= 2
@@ -313,6 +351,8 @@ class BaseISC(object):
                 data_object = pyisc.DataObject(X,class_column=y)
 
             if data_object is not None:
+                assert self._max_index < data_object.length()  # ensure that data distribution has not to large index into the data
+
                 return self._fit(data_object)
 
         raise ValueError("Unknown type of data to fit X, y:", type(X), type(y))
@@ -328,10 +368,17 @@ class BaseISC(object):
         :return: self
         '''
 
+
         if isinstance(X, pyisc.DataObject) and y is None and X.class_column == self.class_column:
+
+            assert self._max_index < X.length()  # enusre that data distribution has not to large index into the data
+
             self._anomaly_detector._TrainDataIncrementally(X)
             return self
         elif isinstance(X, ndarray) or isinstance(X, list):
+
+            assert self._max_index < len(X[0])  # enusre that data distribution has not to large index into the data
+
             data_object = self._convert_to_data_object_in_scoring(array(X), y)
 
             if data_object is not None:
