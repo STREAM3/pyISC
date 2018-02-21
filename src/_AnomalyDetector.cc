@@ -71,13 +71,6 @@ void _AnomalyDetector::importModel(IscAbstractModelImporter *importer) {
 
     delete innerImporter;
 
-
-	for(int i=0; i <  component_distribution_creators.size(); i++) {
-		IscAbstractModelImporter *compImporter = importer->getModelImporter(i);
-		this->component_distribution_creators[i]->importModel(compImporter);
-		//delete compImporter;
-	}
-
 	if(DEBUG)
 		printf("_AnomalyDetector imported\n");
 }
@@ -88,15 +81,8 @@ void _AnomalyDetector::exportModel(IscAbstractModelExporter *exporter) {
 	::AnomalyDetector::exportModel(innerExporter);
     delete innerExporter;
 
-	for(int i=0; i <  component_distribution_creators.size(); i++) {
-		IscAbstractModelExporter *compExporter = exporter->createModelExporter(i);
-		this->component_distribution_creators[i]->exportModel(compExporter);
-		delete compExporter;
-	}
-
 	if(DEBUG)
 		printf("_AnomalyDetector exported\n");
-
 
 }
 

@@ -399,3 +399,33 @@ class BaseISC(object):
             return self._anomaly_detector._LogProbabilityOfData(pyisc.DataObject(c_[X,y], class_column=len(X[0])), len(X)).sum()
         else:
             return self._anomaly_detector._LogProbabilityOfData(pyisc.DataObject(X), len(X)).sum()
+
+
+    def exportJSon(self):
+        '''
+        Export the learned model to JSon.
+        :return: string with JSon
+        '''
+        #TODO: add export/import of constructor arguments
+
+        exporter = pyisc._JSonExporter()
+        self._anomaly_detector.exportModel(exporter)
+        return exporter.getJSonString()
+
+    def importJSon(self, json):
+        '''
+        Parses and imports a learned model from JSon.
+
+        Observe that the constructor arguments of the anomaly detector must be known and defined before importing.
+        That is, the component_models, output_combination_rule, anomaly_threshold, etc. are not exported/imported due to
+        limitation of the underlying C++ implementation, but should be provided to the importing detector at construction.
+
+        :param json: string
+        :return: True if successful, False otherwise
+        '''
+        importer = pyisc._JSonImporter()
+        success = importer.parseJSon(json)
+        if success:
+            self._anomaly_detector.importModel(importer)
+        return success
+
