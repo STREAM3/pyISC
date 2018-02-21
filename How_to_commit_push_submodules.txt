@@ -3,3 +3,5 @@ In pyISC folder:
 git commit -a -m "Commiting submodule changes from superproject"
 
 git push --recurse-submodules=on-demand
+
+See https://stackoverflow.com/questions/14233939/git-submodule-commit-push-pull?noredirect=1&lq=1
