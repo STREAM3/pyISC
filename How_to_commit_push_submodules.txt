@@ -1,0 +1,5 @@
+In pyISC folder:
+
+git commit -a -m "Commiting submodule changes from superproject"
+
+git push --recurse-submodules=on-demand
