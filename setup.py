@@ -45,7 +45,7 @@ if not os.path.exists(np_file_name):
 
 ###### END numpy.i import #######
 
-extra_flags = []
+extra_flags = ["-g"]
 
 disc_dir = "."
 

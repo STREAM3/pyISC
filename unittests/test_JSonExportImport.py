@@ -15,7 +15,7 @@ class MyTestCase(unittest.TestCase):
         gs_normal = norm(1, 12)
         gs_anomaly = norm(2, 30)
 
-        normal_len = 10000
+        normal_len = 100
         anomaly_len = 15
 
         data = np.column_stack(
@@ -37,10 +37,7 @@ class MyTestCase(unittest.TestCase):
 
         anomaly_detector.fit(data);
 
-        exporter = pyisc._JSonExporter()
-        anomaly_detector._anomaly_detector.exportModel(exporter)
-
-        json =  exporter.getJSonString()
+        json =  anomaly_detector.exportJSon()
 
         print json
 
@@ -53,12 +50,15 @@ class MyTestCase(unittest.TestCase):
             output_combination_rule=pyisc.cr_max
         )
 
-        importer = pyisc._JSonImporter()
-        importer.parseJSon(json)
-        anomaly_detector2._anomaly_detector.importModel(importer)
+        anomaly_detector2.importJSon(json)
+        
+        json2 = anomaly_detector2.exportJSon()
 
+        print json2
 
-        self.assertSequenceEqual(anomaly_detector.anomaly_score(data), anomaly_detector2.anomaly_score(data))
+        self.assertEqual(json, json2)
+
+        self.assertTrue(np.array_equal(anomaly_detector.anomaly_score(data), anomaly_detector2.anomaly_score(data)))
 
 
 if __name__ == '__main__':

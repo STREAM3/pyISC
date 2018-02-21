@@ -60,6 +60,8 @@ IscAbstractModelImporter* _JSonImporter::getModelImporter(const char * parameter
 		printf("Import %s as json object", parameter_name);
 
 	ArduinoJson::JsonObject& object = (*root)[std::string(parameter_name)];
+
+
 	return ( IscAbstractModelImporter*) new _JSonImporter(&object);
 }
 IscAbstractModelImporter* _JSonImporter::getModelImporter(int parameter_id){
@@ -67,6 +69,8 @@ IscAbstractModelImporter* _JSonImporter::getModelImporter(int parameter_id){
 		printf("Import %i as json object", parameter_id);
 
 	ArduinoJson::JsonObject& object = (*root)[std::to_string(parameter_id)];
+
+
 	return ( IscAbstractModelImporter*) new _JSonImporter(&object);
 }
 

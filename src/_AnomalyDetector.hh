@@ -46,7 +46,7 @@ public:
 			::IscCombinationRule cr,
 			 std::vector<IscMicroModel*> vector);
 	/**
-	 * n is number of isc mixture components
+	 * n is number of isc mixture models
 	 * off is the first column containing features used by the detector
 	 * splt is a the column containing a known class
 	 * th is a threshold on when to consider a vector of data as anomalous
