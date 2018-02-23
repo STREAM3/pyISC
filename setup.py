@@ -121,7 +121,7 @@ isc_sources = [os.path.join(isc_src_dir, src)
                           "hmatrix.o gamma.o hgf.o"
                    .replace(".o", ".cc").split()]
 
-pyisc_sources = [os.path.join(pyisc_src_dir, src) for src in ["_Format.cc", "_DataObject.cc", "_AnomalyDetector.cc", "_JSonExporter.cc", "_JSonImporter.cc"]]
+pyisc_sources = [os.path.join(pyisc_src_dir, src) for src in ["_Format.cc", "_DataObject.cc", "_AnomalyDetector.cc", "_JSonExporter.cc", "_JSonImporter.cc", "mystring.cc"]]
 pyisc_headers = [s.replace(".cc", ".hh") for s in pyisc_sources]
 
 # Only run when creating the distribution, not when installing it on someone else computer. Removes dependency on Swig
