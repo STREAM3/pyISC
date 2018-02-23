@@ -10,12 +10,13 @@
 
 #include "isc_exportimport.hh"
 #include "ArduinoJson.hpp"
+#include "mystring.hh"
+
 #ifndef DEBUG
 #define DEBUG 0
 #endif
 
 namespace pyisc {
-
 
 class _JSonImporter : IscAbstractModelImporter {
 public:

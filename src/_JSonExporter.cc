@@ -49,7 +49,7 @@ namespace pyisc {
 	 return ( IscAbstractModelExporter*) new _JSonExporter(root.createNestedObject(std::string(parameter_name)));
  }
  IscAbstractModelExporter* _JSonExporter::createModelExporter(int parameter_id){
-	 return ( IscAbstractModelExporter*) new _JSonExporter(root.createNestedObject(std::to_string(parameter_id)));
+	 return ( IscAbstractModelExporter*) new _JSonExporter(root.createNestedObject(to_string(parameter_id)));
 }
 
 std::string _JSonExporter::getJSonString() {

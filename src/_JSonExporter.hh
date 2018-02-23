@@ -10,8 +10,11 @@
 
 #include "isc_exportimport.hh"
 #include "ArduinoJson.hpp"
+#include "mystring.hh"
+
 
 namespace pyisc {
+
 
 // for convenience
 
