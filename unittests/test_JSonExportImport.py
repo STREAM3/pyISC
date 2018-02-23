@@ -39,7 +39,7 @@ class MyTestCase(unittest.TestCase):
 
         json =  anomaly_detector.exportJSon()
 
-        #print json
+        print json
 
         anomaly_detector2 = pyisc.AnomalyDetector(
             component_models=[
