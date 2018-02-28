@@ -56,9 +56,10 @@ class MyTestCase(unittest.TestCase):
 
         #print json2
 
+        self.assertTrue(np.array_equal(anomaly_detector.anomaly_score(data), anomaly_detector2.anomaly_score(data)))
+
         self.assertEqual(json, json2)
 
-        self.assertTrue(np.array_equal(anomaly_detector.anomaly_score(data), anomaly_detector2.anomaly_score(data)))
 
 
 if __name__ == '__main__':
