@@ -145,25 +145,25 @@ if os.path.exists('pyisc.i'):
           )
 
 # The following overlapping setup is only run in order to inlcude pyisc.py when all *.py files are copied to the same folder.
-
-setup(name="pyisc",
-      author="Tomas Olsson",
-      author_email="tomas.olsson@ri.se",
-      url="http://www.sics.se",
-      version="1.0",
-      ext_modules=[
-          Extension("_pyisc",
-                    language='c++',
-                    sources=["pyisc.i"]+dataframe_sources+isc_sources+pyisc_sources,
-                    include_dirs=[disc_dir, isc_src_dir,dataframe_src_dir,pyisc_src_dir, arduinojson_dir]+numpyincdir,
-                    extra_compile_args=extra_flags,
-                    swig_opts=['-c++', '-I'+str(disc_dir)])
-      ],
-      py_modules=py_modules,
-      license="LGPLv3+",
-      classifiers=[
-          'License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)'
-      ]
-      )
+if not "--single-version-externally-managed" in sys.argv:
+    setup(name="pyisc",
+          author="Tomas Olsson",
+          author_email="tomas.olsson@ri.se",
+          url="http://www.sics.se",
+          version="1.0",
+          ext_modules=[
+              Extension("_pyisc",
+                        language='c++',
+                        sources=["pyisc.i"]+dataframe_sources+isc_sources+pyisc_sources,
+                        include_dirs=[disc_dir, isc_src_dir,dataframe_src_dir,pyisc_src_dir, arduinojson_dir]+numpyincdir,
+                        extra_compile_args=extra_flags,
+                        swig_opts=['-c++', '-I'+str(disc_dir)])
+          ],
+          py_modules=py_modules,
+          license="LGPLv3+",
+          classifiers=[
+              'License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)'
+          ]
+          )
 
 
