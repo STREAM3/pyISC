@@ -1,7 +1,6 @@
 import os
 import sys
-#from skbuild import setup
-from distutils.core import setup,Extension
+from setuptools import setup,Extension
 
 from numpy.distutils.misc_util import get_numpy_include_dirs
 from distutils.sysconfig import get_python_lib;
