@@ -154,10 +154,10 @@ setup(name="pyisc",
       ext_modules=[
           Extension("_pyisc",
                     language='c++',
-                    sources=["pyisc_wrap.cpp"]+dataframe_sources+isc_sources+pyisc_sources,
+                    sources=["pyisc.i"]+dataframe_sources+isc_sources+pyisc_sources,
                     include_dirs=[disc_dir, isc_src_dir,dataframe_src_dir,pyisc_src_dir, arduinojson_dir]+numpyincdir,
                     extra_compile_args=extra_flags,
-                    swig_opts=['-c++'])
+                    swig_opts=['-c++', '-I'+str(disc_dir)])
       ],
       py_modules=py_modules,
       license="LGPLv3+",
