@@ -14,7 +14,7 @@ requirements:
     - requests
     - setuptools
   run:
-    - libcxx
+    - libcxx [not win]
     - python
     - numpy
     - scipy
