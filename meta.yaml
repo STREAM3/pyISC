@@ -3,8 +3,7 @@ package:
   version: "master"
 
 source:
-  git_rev: master
-  git_url: https://github.com/STREAM3/pyISC.git
+  path: .
 
 requirements:
   build:
