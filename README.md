@@ -17,7 +17,7 @@ Install Python 2.7
 Anaconda is the recommended Python distribution : https://www.continuum.io/downloads
 
 Libraries: 
-- numpy, scipy, sklearn (required for running pyisc)
+- numpy, scipy, scikit-learn (required for running pyisc)
 - matplotlib, ipython, jupyter, pandas (only required for running tutorial examples)
 
 Install with anaconda:  
