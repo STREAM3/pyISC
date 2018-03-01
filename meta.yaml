@@ -1,18 +1,20 @@
 package:
   name: pyisc
-  version: "beta2"
+  version: "master"
 
 source:
-  git_rev: beta2
+  git_rev: master
   git_url: https://github.com/STREAM3/pyISC.git
 
 requirements:
   build:
+    - swig
     - python
     - numpy
     - requests
     - setuptools
   run:
+    - libcxx
     - python
     - numpy
     - scipy
@@ -25,4 +27,4 @@ test:
 about:
   home: https//www.sics.se
   license: LGPLv3
-  license_file: LICENSE.md
+  license_file: LICENSE
