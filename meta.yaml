@@ -12,6 +12,8 @@ requirements:
     - numpy
     - requests
     - setuptools
+    - mingw [win]
+    - libpython 1.0 [win]
   run:
     - libcxx [not win]
     - python
