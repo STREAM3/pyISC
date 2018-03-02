@@ -14,7 +14,8 @@ requirements:
     - setuptools
     - mingw [win]
     - libpython 1.0 [win]
-    - git [win]
+    - posix  #unfortunetly needed
+    - m2-git
   run:
     - libcxx [not win]
     - python
