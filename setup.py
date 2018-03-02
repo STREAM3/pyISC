@@ -145,8 +145,7 @@ if os.path.exists('pyisc.i'):
           )
 
 # The following overlapping setup is only run in order to inlcude pyisc.py when all *.py files are copied to the same folder.
-if not "--single-version-externally-managed" in sys.argv:
-    setup(name="pyisc",
+setup(name="pyisc",
           author="Tomas Olsson",
           author_email="tomas.olsson@ri.se",
           url="http://www.sics.se",

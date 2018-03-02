@@ -1,6 +1,6 @@
 package:
   name: pyisc
-  version: "master"
+  version: "develop"
 
 source:
   path: .
@@ -14,6 +14,7 @@ requirements:
     - setuptools
     - mingw [win]
     - libpython 1.0 [win]
+    - git [win]
   run:
     - libcxx [not win]
     - python
