@@ -2,10 +2,12 @@ import unittest
 
 import pyisc;
 import numpy as np
-from scipy.stats import poisson, norm
+from scipy.stats import norm
+from numpy.testing.utils import assert_allclose
+
 
 class MyTestCase(unittest.TestCase):
-    def test_something(self):
+    def test_multivariate_gaussian(self):
         po_normal = norm(1.1, 5)
         po_anomaly = norm(1.5, 7)
 
@@ -54,13 +56,62 @@ class MyTestCase(unittest.TestCase):
         
         json2 = anomaly_detector2.exportJSon()
 
-        #print json2
+        print json2
 
-        self.assertTrue(np.array_equal(anomaly_detector.anomaly_score(data), anomaly_detector2.anomaly_score(data)))
-
+        assert_allclose(anomaly_detector.anomaly_score(data), anomaly_detector2.anomaly_score(data))
         self.assertEqual(json, json2)
 
 
 
+    def test_conditional_gaussian(self):
+        po_normal = norm(1.1, 5)
+        po_anomaly = norm(1.5, 7)
+
+        po_normal2 = norm(2.2, 10)
+        po_anomaly2 = norm(3, 12)
+
+        gs_normal = norm(1, 12)
+        gs_anomaly = norm(2, 30)
+
+        normal_len = 100
+        anomaly_len = 15
+
+        data = np.column_stack(
+            [
+                list(po_normal.rvs(normal_len)) + list(po_anomaly.rvs(anomaly_len)),
+                list(po_normal2.rvs(normal_len)) + list(po_anomaly2.rvs(anomaly_len)),
+                list(gs_normal.rvs(normal_len)) + list(gs_anomaly.rvs(anomaly_len)),
+            ]
+        )
+
+        anomaly_detector = pyisc.AnomalyDetector(
+            component_models=[
+                pyisc.P_ConditionalGaussianCombiner([pyisc.P_ConditionalGaussian([0], [1]), pyisc.P_ConditionalGaussian([1], [2])])
+            ],
+            output_combination_rule=pyisc.cr_max
+        )
+
+        anomaly_detector.fit(data);
+
+        json = anomaly_detector.exportJSon()
+
+        print json
+
+        anomaly_detector2 = pyisc.AnomalyDetector(
+            component_models=[
+                pyisc.P_ConditionalGaussianCombiner([pyisc.P_ConditionalGaussian([0], [1]), pyisc.P_ConditionalGaussian([1], [2])])
+            ],
+            output_combination_rule=pyisc.cr_max
+        )
+
+        anomaly_detector2.importJSon(json)
+
+        json2 = anomaly_detector2.exportJSon()
+
+        print json2
+
+        self.assertEqual(json, json2)
+
+        assert_allclose(anomaly_detector.anomaly_score(data), anomaly_detector2.anomaly_score(data))
 if __name__ == '__main__':
     unittest.main()
