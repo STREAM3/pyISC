@@ -12,7 +12,7 @@ build:
 requirements:
   build:
     - swig
-    - python
+    - python {{python}}
     - numpy
     - requests
     - setuptools
