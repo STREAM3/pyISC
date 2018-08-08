@@ -126,7 +126,7 @@ class TestPConditionalGaussian(TestCase):
         ).fit(X)
         s2 = ad2.anomaly_score(X)
 
-        print "r:", pearsonr(s1,s2)
+        print("r:", pearsonr(s1,s2))
 
         assert_allclose(s1, s2, rtol=0.01)  # OK
 

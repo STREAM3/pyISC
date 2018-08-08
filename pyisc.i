@@ -216,7 +216,7 @@ def _to_numpy_array(inarray, n, type=double):
         return _to_numpy_array_double(inarray,n);
     elif type == int:
         return _to_numpy_array_int(inarray,n);
-    print "Unknown type ", type
+    print ("Unknown type ", type)
 
  %}
 

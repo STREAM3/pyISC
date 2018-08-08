@@ -5,7 +5,7 @@ pylib = get_python_lib()
 
 for file in os.listdir('.'):
     if not file.startswith('setup'):
-        print "copy", file, "to", os.path.join(pylib, file)
+        print("copy", file, "to", os.path.join(pylib, file))
         if os.path.isdir(file):
             dst = os.path.join(pylib, file)
             if os.path.exists(dst):

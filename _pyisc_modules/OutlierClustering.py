@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------
 
 from pyisc import SklearnOutlierDetector
-from AnomalyClustering import AnomalyClustering
+from .AnomalyClustering import AnomalyClustering
 
 class OutlierClustering(AnomalyClustering,SklearnOutlierDetector):
     max_num_of_iterations = 1000

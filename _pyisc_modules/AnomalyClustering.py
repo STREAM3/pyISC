@@ -42,7 +42,7 @@ class AnomalyClustering(AnomalyDetector):
     def fit(self,X,verbose=False):
         ss =[]
         labels_list = []
-        for i in xrange(self.n_repeat):
+        for i in range(self.n_repeat):
             od = self._create_detector(*self.ad_parms0, **self.ad_parms1)
             labels = self._train_clf(od, X, self.n_clusters,verbose=verbose)
 
@@ -78,11 +78,11 @@ class AnomalyClustering(AnomalyDetector):
 
         while True:
             if cluster_labels is None:  # Restart the clustering
-                cluster_labels = np.array(utils.shuffle(np.mod(np.array(range(len(X))), k))) if k > 1 else np.array([0 for _ in range(len(X))])
+                cluster_labels = np.array(utils.shuffle(np.mod(np.array(list(range(len(X)))), k))) if k > 1 else np.array([0 for _ in range(len(X))])
                 last_movements = [-1 for _ in range(num_of_last_movements)]
                 num_of_iterations = 0
                 if verbose:
-                    print "Initialized clusters",np.unique(cluster_labels)
+                    print("Initialized clusters",np.unique(cluster_labels))
 
             ad.fit(X, cluster_labels)
             if ad.classes_ == []:
@@ -104,7 +104,7 @@ class AnomalyClustering(AnomalyDetector):
                 continue
 
             if verbose:
-                print "movements", movements
+                print("movements", movements)
 
             if movements == 0:
                 break

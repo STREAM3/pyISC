@@ -44,13 +44,13 @@ class MyTestCase(unittest.TestCase):
 
         p =  pickle.dumps(anomaly_detector)
 
-        print p
+        print(p)
 
         anomaly_detector2 = pickle.loads(p)
 
         json2 = anomaly_detector2.exportJSon()
 
-        print json2
+        print(json2)
 
         assert_allclose(anomaly_detector.anomaly_score(data), anomaly_detector2.anomaly_score(data))
         self.assertEqual(json, json2)
@@ -89,17 +89,17 @@ class MyTestCase(unittest.TestCase):
 
         json = anomaly_detector.exportJSon()
 
-        print json
+        print(json)
 
         p = pickle.dumps(anomaly_detector)
 
-        print p
+        print(p)
 
         anomaly_detector2 = pickle.loads(p)
 
         json2 = anomaly_detector2.exportJSon()
 
-        print json2
+        print(json2)
 
         self.assertEqual(json, json2)
 

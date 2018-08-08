@@ -101,8 +101,8 @@ class DataObject(pyisc._DataObject):
 
         #print self.class_column, self.classes_, unique(array1D[range(self.class_column,len(array1D),self.length())])
         if self.class_column is not None:
-            array1D[range(self.class_column,len(array1D),self.length())] = \
-                [self.classes_[int(c)] if int(c) != -1 else None for c in array1D[range(self.class_column,len(array1D),self.length())] ]
+            array1D[list(range(self.class_column,len(array1D),self.length()))] = \
+                [self.classes_[int(c)] if int(c) != -1 else None for c in array1D[list(range(self.class_column,len(array1D),self.length()))] ]
 
         return array1D
 

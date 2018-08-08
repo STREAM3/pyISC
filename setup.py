@@ -28,7 +28,7 @@ if not os.path.exists(np_file_name):
                             .search(numpy.__version__)
     np_version_string = np_version.group()
     np_version_info = {key: int(value)
-                       for key, value in np_version.groupdict().items()}
+                       for key, value in list(np_version.groupdict().items())}
 
 
     np_file_url = 'https://raw.githubusercontent.com/numpy/numpy/maintenance/' + \
@@ -91,7 +91,7 @@ if "uninstall" in sys.argv:
                 os.removedirs(file)
             else:
                 os.remove(file)
-            print "removing "+file
+            print("removing "+file)
 
     sys.exit()
 

@@ -7,7 +7,7 @@ import pyisc
 
 class test_SklearnOutlierDetection(unittest.TestCase):
     def test_outlier_detection(self):
-        print "Start of test"
+        print("Start of test")
         n_samples = 1000
         norm_dist = stats.norm(0, 1)
 
@@ -36,7 +36,7 @@ class test_SklearnOutlierDetection(unittest.TestCase):
 
         accuracy =  sum(truth == predictions)/float(n_samples)
 
-        print "accuracy", accuracy
+        print("accuracy", accuracy)
         self.assertGreater(accuracy, 0.85)
 
 

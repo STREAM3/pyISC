@@ -41,7 +41,7 @@ class TestPConditionalGaussianDependencyMatrix(TestCase):
 
         # Next two should be equal
         s0 = AnomalyDetector(
-            P_ConditionalGaussianDependencyMatrix(range(length),length)
+            P_ConditionalGaussianDependencyMatrix(list(range(length)),length)
         ).fit(X).anomaly_score(X)
 
         ad1=AnomalyDetector(
@@ -76,7 +76,7 @@ class TestPConditionalGaussianDependencyMatrix(TestCase):
         data = r_[X,Y,Z]
         labels = r_[['X']*len(X), ['Y']*len(Y), ['Z']*len(Z)]
 
-        data_index = shuffle(range(len(data)))
+        data_index = shuffle(list(range(len(data))))
         training_set = data_index[:n_samples*2]
         test_set = data_index[n_samples*2:]
 
@@ -91,7 +91,7 @@ class TestPConditionalGaussianDependencyMatrix(TestCase):
                 AnomalyDetector(P_ConditionalGaussianCombiner([P_ConditionalGaussian([i], [i-1]) for i in range(1, length)]+
                                                               [P_ConditionalGaussian([0], [])])),
             'dependency matrix':
-                AnomalyDetector(P_ConditionalGaussianDependencyMatrix(range(length),length))
+                AnomalyDetector(P_ConditionalGaussianDependencyMatrix(list(range(length)),length))
         }
 
         all_acc = {}
@@ -103,7 +103,7 @@ class TestPConditionalGaussianDependencyMatrix(TestCase):
             labels_predicted = adclf.predict(data[test_set])
             accuracy = sum(labels[test_set]==labels_predicted)/float(len(test_set))
             all_acc[key] = accuracy
-            print key, "accuracy = ", accuracy
+            print(key, "accuracy = ", accuracy)
 
 
         assert_close(all_acc['independent gaussian'],all_acc['independent conditional gaussian'],decimal=2)
