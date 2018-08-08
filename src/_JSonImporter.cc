@@ -10,7 +10,9 @@
 
 namespace pyisc {
 
-void _JSonImporter::notImplemented(){printf("JSon importer not implemented\n");}
+void _JSonImporter::notImplemented(){
+    printf("JSon importer not implemented\n");
+}
 
 void _JSonImporter::fillParameter(const char* parameter_name, int& value){
 	if(DEBUG)

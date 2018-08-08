@@ -25,6 +25,7 @@ requirements:
     - numpy
     - scipy
     - scikit-learn
+    - libpython 1.0 [win]
 
 test:
   imports:

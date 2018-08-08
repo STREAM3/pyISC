@@ -29,7 +29,7 @@ import pyisc
 
 class AnomalyDetector(BaseISC):
 
-    def anomaly_score(self,X, y=None):
+    def anomaly_score(self,X, y=None, n_jobs=1):
         '''
         Score each row in X,y with an anomaly score.
         :param X: a single array, an array of arrays, or an instance of pyisc DataObject

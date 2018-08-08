@@ -38,6 +38,7 @@ namespace pyisc {
 
 class _AnomalyDetector : ::AnomalyDetector {
 public:
+
 	_AnomalyDetector(
 			int off,
 			int splt,

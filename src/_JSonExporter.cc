@@ -11,7 +11,9 @@
 namespace pyisc {
 
 
- void _JSonExporter::notImplemented(){}
+ void _JSonExporter::notImplemented(){
+    root[std::string("EXPORT_NOT_IMPLEMENTED")] = true;
+ }
 
  void _JSonExporter::addParameter(const char* parameter_name, const char* value){
 	 root[std::string(parameter_name)] = std::string(value);

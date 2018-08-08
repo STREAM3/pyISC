@@ -57,6 +57,12 @@ class P_ProbabilityModel:
         '''
         pass
 
+    def __getstate__(self):
+        odict = self.__dict__.copy() # copy the dict since we change it
+        del odict['_saved_model']              # remove swig object entry
+        return odict
+
+
 class P_Gaussian(P_ProbabilityModel):
 
     def __init__(self, value_column):
@@ -289,19 +295,20 @@ class BaseISC(object):
 
         self.component_models = component_models
 
-        self._max_index = array([_.get_column_index() for _ in component_models]).flatten().max()
+        self._max_index = numpy.vstack([numpy.max(_.get_column_index()) for _ in component_models]).flatten().max()
 
-
-        # Map argument to C++ argument
-        comp_distributions = _IscMicroModelVector()
-
-        for i in range(n):
-            comp_distributions.push_back(self.component_models[i].create_micromodel())
 
         self.classes_ = None
         self.num_of_partitions = n
-        self._anomaly_detector = _AnomalyDetector(off, splt, th, cl, output_combination_rule, comp_distributions);
 
+        self._create_inner_anomaly_detector(cl, n, off, output_combination_rule, splt, th)
+
+    def _create_inner_anomaly_detector(self, cl, n, off, output_combination_rule, splt, th):
+        # Map argument to C++ argument
+        comp_distributions = _IscMicroModelVector()
+        for i in range(n):
+            comp_distributions.push_back(self.component_models[i].create_micromodel())
+        self._anomaly_detector = _AnomalyDetector(off, splt, th, cl, output_combination_rule, comp_distributions);
 
     def fit(self, X, y=None):
         '''
@@ -476,3 +483,18 @@ class BaseISC(object):
             self._anomaly_detector.importModel(importer)
         return success
 
+
+    # The getstate setstate let us handle the pickleing of the swig object using json instead
+    def __getstate__(self):
+        odict = self.__dict__.copy() # copy the dict since we change it
+        del odict['_anomaly_detector']              # remove swig object entry
+        odict['_anomaly_detector_json'] = self.exportJSon()
+        return odict
+
+    def __setstate__(self, dict):
+        _anomaly_detector_json = dict['_anomaly_detector_json']
+        del dict['_anomaly_detector_json']
+        self.__dict__.update(dict)   # update attributes
+        self._create_inner_anomaly_detector(False, self.num_of_partitions, 0, self.output_combination_rule, -1, self.anomaly_threshold)
+        if not self.importJSon(_anomaly_detector_json):
+            raise Exception("Import of JSON did not work properly")
