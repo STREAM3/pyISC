@@ -18,6 +18,7 @@ requirements:
     - setuptools
     - mingw [win]
     - libpython 1.0 [win]
+    - mkl 2017.0.3 [win]
 
   run:
     - libcxx [not win]
@@ -27,6 +28,8 @@ requirements:
     - scikit-learn
     - swig
     - libpython 1.0 [win]
+    - mkl 2017.0.3 [win]
+
 
 test:
   imports:
