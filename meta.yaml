@@ -25,6 +25,7 @@ requirements:
     - numpy
     - scipy
     - scikit-learn
+    - swig
     - libpython 1.0 [win]
 
 test:
